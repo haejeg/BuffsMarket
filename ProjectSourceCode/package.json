@@ -13,6 +13,6 @@
     },
     "scripts": {
         "prestart": "npm install",
-        "start": "nodemon src/index.js"
+        "start": "./node_modules/nodemon/bin/nodemon.js ./src/index.js"
     }
 }
