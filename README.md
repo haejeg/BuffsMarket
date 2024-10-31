@@ -26,3 +26,7 @@ Go to localhost:3000 in a web browser
 ## How to run tests:
 
 ## Link to deployed application:
+
+## Contributors:
+Group 3, BuffsMarket  
+Haeseo Jeong, Jaron Barrett, Daniel Monteiro, Alex Paquier, and Ethan Telang
