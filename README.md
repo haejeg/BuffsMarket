@@ -28,5 +28,14 @@ Go to localhost:3000 in a web browser
 ## Link to deployed application:
 
 ## Contributors:
-Group 3, BuffsMarket  
-Haeseo Jeong, Jaron Barrett, Daniel Monteiro, Alex Paquier, and Ethan Telang
+Group 3, BuffsMarket  <br /> 
+
+Haeseo Jeong | haejeg | haejeg@gmail.com<br /> 
+
+Jaron Barrett | jaronbarrettCU | jaba6921@colorado.edu<br /> 
+
+Daniel Monteiro | damo8852 | damo8852@colorado.edu <br /> 
+
+Alex Paquier | Alexpaq27 | alpa5529@colorado.edu <br /> 
+
+Ethan Telang | etelangboulder | ette8193@colorado.edu
