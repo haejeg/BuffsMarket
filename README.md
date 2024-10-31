@@ -12,7 +12,7 @@ BuffsMarket is a dedicated platform exclusively for CU Boulder students, providi
 - docker
 
 ## Run by:
-Open ProjectSourceCode folder, and type <br />
+Open ProjectSourceCode folder, and type <br /> 
 ```docker compose up``` <br />
 Go to localhost:3000 in a web browser
 
