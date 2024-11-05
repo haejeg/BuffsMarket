@@ -1,0 +1,26 @@
+CU Gold
+
+C0 M10 Y48 K22
+R207 G184 B124
+#CFB87C
+
+CU black brand color
+Black
+
+C0 M0 Y0 K100
+R0 G0 B0
+#000000
+
+CU dark gray brand color
+CU Dark Gray
+
+C38 M28 Y21 K63
+R86 G90 B92
+#565A5C
+
+CU light gray brand color
+CU Light Gray
+
+C16 M11 Y11 K29
+R162 G164 B163
+#A2A4A3
