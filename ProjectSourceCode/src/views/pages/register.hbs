@@ -17,9 +17,14 @@
     }
     small:hover {
       color: rgb(82, 80, 70) !important;
-      {{!-- transition:all 1s ease !important;
-      -webkit-transition: all .4s ease !important; 
-      not sure if im gonna use this lol - danny --}}
+    }
+    .custom-btn {
+      background-color: #CFB87C;
+      color: #fff;
+    }
+    .custom-btn:hover {
+      background-color: #fff9d7;
+      color: #363636;
     }
   </style>
 </head>
@@ -38,7 +43,7 @@
         <label for="password" class="form-label">Password</label>
         <input type="password" class="form-control" id="password" name="password" required>
       </div>
-      <button type="submit" class="btn btn-primary">Complete Registration</button>
+      <button type="submit" class="btn custom-btn transition">Complete Registration</button>
     </form>
     <p>Done registering? Go back to <a href="/login">Login</a>.</p>
   </div>

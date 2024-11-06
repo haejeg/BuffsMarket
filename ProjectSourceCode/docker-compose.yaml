@@ -10,7 +10,6 @@ services:
     volumes:
       - group-project:/var/lib/postgresql/data 
       - ./init_data:/docker-entrypoint-initdb.d 
-      # - ./init_data:/docker-entrypoint-initdb.d
 
   web:
     image: node:lts

@@ -1,1 +1,9 @@
 body {background-color: black !important;}
+.custom-btn {
+    background-color: #CFB87C;
+    color: #fff;
+}
+.custom-btn:hover {
+    background-color: #fff9d7;
+    color: #363636;
+}
