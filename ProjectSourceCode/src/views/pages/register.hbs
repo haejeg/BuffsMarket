@@ -14,7 +14,6 @@
       -webkit-transition:all .4s !important;
       -o-transition: all .4s !important;
       position:relative !important; 
-      cursor:pointer !important;
     }
     small:hover {
       color: rgb(82, 80, 70) !important;
@@ -30,8 +29,8 @@
     <h1 class="mb-4">Create an account</h1>
     <form method="POST" action="/register" class="w-50">
       <div class="mb-3">
-        <label for="email" class="form-label">Email</label> 
-        <input type="email" class="form-control" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@colorado\.edu$" required> 
+        <label for="username" class="form-label">Email</label> 
+        <input type="email" class="form-control" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@colorado\.edu$" required>
         <small class="form-text text-muted transition">Email must end with "@colorado.edu".</small> 
       </div>
       <div class="mb-3">
@@ -43,9 +42,7 @@
     <p>Done registering? Go back to <a href="/login">Login</a>.</p>
   </div>
 
-  <footer class="text-center text-muted mt-auto">
-    <p>&copy; Copyright 2024 : CSCI 3308</p>
-  </footer>
+  
 
   
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

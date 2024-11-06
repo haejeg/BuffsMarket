@@ -41,6 +41,8 @@ db.connect()
     console.log('ERROR:', error.message || error);
   });
 
+
+
 // *****************************************************
 // <!-- Section 3 : App Settings -->
 // *****************************************************
@@ -82,38 +84,40 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const { username } = req.body;
+    const { email } = req.body;
+    // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
+    // - Danny
     const query = 'INSERT INTO users (username, password) VALUES ($1, $2)';
-    await db.none(query, [username, hashedPassword]);
+
+    await db.none(query, [email, hashedPassword]); 
     res.redirect('/login');
   } catch (err) {
     console.error(err);
-    if (err.code === '23505') {
-      res.render('pages/register', { message: 'Username already exists. Please choose another one.', error:true });
+    if (err.code === '23505') { // PostgreSQL unique violation error code
+      res.render('pages/register', { message: 'Email already registered. Please use a different email.', error: true });
     } else {
       res.status(500).send('Error registering user');
     }
   }
 });
 
+
 // Handle login
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body; 
+  // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
+  // - Danny
   try {
-    // Find the user by username
     const query = 'SELECT * FROM users WHERE username = $1';
-    const user = await db.oneOrNone(query, [username]);
+    const user = await db.oneOrNone(query, [email]); 
 
-    // If user is not found, redirect to the registration page
     if (!user) {
-      console.log(`Login attempt failed: Username "${username}" not found.`);
+      console.log(`Login attempt failed: Username "${email}" not found.`);
       return res.redirect('/register');
     }
 
-    // Check if the password matches
     const match = await bcrypt.compare(password, user.password);
     if (match) {
-      // Save user details in session and redirect to /discover
       req.session.user = user;
       req.session.save((err) => {
         if (err) {
@@ -136,32 +140,32 @@ app.post('/login', async (req, res) => {
 
 
 // Define the /discover route
-app.get('/discover', auth, async (req, res) => {
-  try {
-    const keyword = 'music'; // Example keyword; change as needed
-    const size = 10; // Number of events to fetch
-    const apiKey = process.env.API_KEY; // Get API key directly from environment variables
+// app.get('/discover', auth, async (req, res) => {
+//   try {
+//     const keyword = 'music'; // Example keyword; change as needed
+//     const size = 10; // Number of events to fetch
+//     const apiKey = process.env.API_KEY; // Get API key directly from environment variables
 
-    const response = await axios({
-      url: `https://app.ticketmaster.com/discovery/v2/events.json`,
-      method: 'GET',
-      headers: {
-        'Accept-Encoding': 'application/json',
-      },
-      params: {
-        apikey: apiKey,
-        keyword: keyword,
-        size: size,
-      },
-    });
+//     const response = await axios({
+//       url: `https://app.ticketmaster.com/discovery/v2/events.json`,
+//       method: 'GET',
+//       headers: {
+//         'Accept-Encoding': 'application/json',
+//       },
+//       params: {
+//         apikey: apiKey,
+//         keyword: keyword,
+//         size: size,
+//       },
+//     });
 
-    const events = response.data._embedded ? response.data._embedded.events : [];
-    res.render('pages/discover', { results: events });
-  } catch (error) {
-    console.error('Error fetching events:', error.message);
-    res.render('pages/discover', { results: [], message: 'Failed to fetch events. Please try again later.', error:true });
-  }
-});
+//     const events = response.data._embedded ? response.data._embedded.events : [];
+//     res.render('pages/discover', { results: events });
+//   } catch (error) {
+//     console.error('Error fetching events:', error.message);
+//     res.render('pages/discover', { results: [], message: 'Failed to fetch events. Please try again later.', error:true });
+//   }
+// });
 
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => {

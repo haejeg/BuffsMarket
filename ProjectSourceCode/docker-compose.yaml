@@ -3,11 +3,14 @@ services:
   db:
     image: postgres:14
     env_file: .env
+    environment:
+      POSTGRES_DB: users_db  # Ensure this is set to your intended database
     ports:
       - '5432:5432'
     volumes:
       - group-project:/var/lib/postgresql/data 
-      - ./ProjectSourceCode/init_data:/docker-entrypoint-initdb.d 
+      - ./init_data:/docker-entrypoint-initdb.d 
+      # - ./init_data:/docker-entrypoint-initdb.d
 
   web:
     image: node:lts
