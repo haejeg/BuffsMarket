@@ -29,6 +29,7 @@
     <h1 class="mb-4">Create an account</h1>
     <form method="POST" action="/register" class="w-50">
       <div class="mb-3">
+        {{> message}}
         <label for="username" class="form-label">Email</label> 
         <input type="email" class="form-control" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@colorado\.edu$" required>
         <small class="form-text text-muted transition">Email must end with "@colorado.edu".</small> 
