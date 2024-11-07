@@ -42,19 +42,25 @@ describe('Server!', () => {
 
   //We are checking POST /add_user API by passing the user info in in incorrect manner (name cannot be an integer). This test case should pass and return a status 400 along with a "Invalid input" message.
 
-describe('Testing Add User API', () => {
-    it('positive : /register', done => {
+  describe('Testing Add User API', () => {
+    it('positive: successfully registers a new user', done => {
         chai
           .request(server)
           .post('/register')
-          .send({nickname: 'Meow', username: 'bruh@colorado.edu', password: 'plug'})
+          .send({
+              nickname: 'Meow', 
+              email: 'bruh@colorado.edu', 
+              password: 'plug'
+          })
           .end((err, res) => {
-            expect(res).to.have.status(200);
-            expect(res.body.message).to.equals('Success');
-            done();
+              expect(res).to.have.status(302); // Expect redirection to login page
+              expect(res).to.redirectTo('/login'); // Check if it redirects to /login
+              done();
           });
-      });
-  
+    });
+});
+
+
     // Example Negative Testcase :
     // API: /add_user
     // Input: {id: 5, name: 10, dob: '2020-02-20'}
@@ -62,18 +68,25 @@ describe('Testing Add User API', () => {
     // Result: This test case should pass and return a status 400 along with a "Invalid input" message.
     // Explanation: The testcase will call the /add_user API with the following invalid inputs
     // and expects the API to return a status of 400 along with the "Invalid input" message.
-    it('Negative : /register. Checking invalid name', done => {
-      chai
-        .request(server)
-        .post('/register')
-        .send({nickname: 'Meow', username: 12, password: 'plug'})
-        .end((err, res) => {
-          expect(res).to.have.status(400);
-          expect(res.body.message).to.equals('Invalid input');
-          done();
-        });
-    });
+    describe('Testing Add User API', () => {
+      it('negative: fails to register with an existing email', done => {
+          chai
+            .request(server)
+            .post('/register')
+            .send({
+                nickname: 12, 
+                email: 'poop@colorado.edu', 
+                password: 'anotherpassword'
+            })
+            .end((err, res) => {
+                expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
+                expect(res.text).to.include('Email already registered. Please use a different email.');
+                done();
+            });
+      });
   });
+  
+  
 
   describe('Testing Redirect', () => {
     // Sample test case given to test /test endpoint.
