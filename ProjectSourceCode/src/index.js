@@ -150,6 +150,11 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// DUMMY API LAB 11
+app.get('/welcome', (req, res) => {
+  res.json({status: 'success', message: 'Welcome!'});
+});
+
 
 
 
@@ -208,6 +213,8 @@ function auth(req, res, next) {
 // <!-- Section 5 : Start Server -->
 // *****************************************************
 
-app.listen(3000, () => {
-  console.log('Server is listening on port 3000');
-});
+// app.listen(3000, () => {
+//   console.log('Server is listening on port 3000');
+// });
+
+module.exports = app.listen(3000);
