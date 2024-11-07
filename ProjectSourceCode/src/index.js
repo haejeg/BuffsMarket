@@ -143,33 +143,35 @@ app.post('/login', async (req, res) => {
 
 
 
-// Define the /discover route
-// app.get('/discover', auth, async (req, res) => {
-//   try {
-//     const keyword = 'music'; // Example keyword; change as needed
-//     const size = 10; // Number of events to fetch
-//     const apiKey = process.env.API_KEY; // Get API key directly from environment variables
 
-//     const response = await axios({
-//       url: `https://app.ticketmaster.com/discovery/v2/events.json`,
-//       method: 'GET',
-//       headers: {
-//         'Accept-Encoding': 'application/json',
-//       },
-//       params: {
-//         apikey: apiKey,
-//         keyword: keyword,
-//         size: size,
-//       },
-//     });
+app.get('/discover', auth, async (req, res) => {
+  try {
+    const keyword = 'music'; // Example keyword; change as needed
+    const size = 10; // Number of events to fetch
+    const apiKey = process.env.API_KEY; // Get API key directly from environment variables
+    res.render('pages/discover', { user: req.session.user }); //USE THIS IN HOME PAGE SO SEARCH BAR SHOWS UP
+    const response = await axios({
+      url: `https://app.ticketmaster.com/discovery/v2/events.json`,
+      method: 'GET',
+      headers: {
+        'Accept-Encoding': 'application/json',
+      },
+      params: {
+        apikey: apiKey,
+        keyword: keyword,
+        size: size,
+      },
+    });
 
-//     const events = response.data._embedded ? response.data._embedded.events : [];
-//     res.render('pages/discover', { results: events });
-//   } catch (error) {
-//     console.error('Error fetching events:', error.message);
-//     res.render('pages/discover', { results: [], message: 'Failed to fetch events. Please try again later.', error:true });
-//   }
-// });
+    const events = response.data._embedded ? response.data._embedded.events : [];
+    res.render('pages/discover', { results: events });
+  } catch (error) {
+    console.error('Error fetching events:', error.message);
+    res.render('pages/discover', { results: [], message: 'Failed to fetch events. Please try again later.', error:true });
+  }
+});
+
+
 
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => {
