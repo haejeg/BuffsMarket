@@ -39,10 +39,16 @@
   <div class="container d-flex justify-content-center align-items-center flex-column" style="height: 80vh;">
     <h1 class="mb-4 custom-title">Sign up</h1>
     <form method="POST" action="/register" class="w-50">
+    <div class="mb-3">
+        <label for="nickname" class="form-label">Nickname</label> 
+        <input type="nickname" class="form-control" id="nickname" name="nickname" required>
+        <small class="form-text text-muted transition">Username must be appropriate</small> 
+      </div>
       <div class="mb-3">
         {{> message}}
-        <label for="username" class="form-label">Email</label> 
-        <input type="email" class="form-control" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@colorado\.edu$" required>
+        <label for="email" class="form-label">Email</label> 
+        {{!-- <input type="email" class="form-control" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@colorado\.edu$" required> --}}
+        <input type="email" class="form-control" id="email" name="email" pattern="^[a-zA-Z0-9._%+\\-]+@colorado\.edu$" required>
         <small class="form-text text-muted transition">Email must end with "@colorado.edu".</small> 
       </div>
       <div class="mb-3">
@@ -51,7 +57,7 @@
       </div>
       <button type="submit" class="btn custom-btn transition">Finish Sign Up</button>
     </form>
-    <p>Done registering? Go back to <a href="/login">The sign in page</a>.</p>
+    <p>Already have an account? <a href="/login">Sign in</a>.</p>
   </div>
 
   

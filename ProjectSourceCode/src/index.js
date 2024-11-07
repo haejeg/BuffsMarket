@@ -80,20 +80,29 @@ app.get('/register', (req, res) => {
   res.render('pages/register');
 });
 
+app.get('/discover', (req, res) => {
+  res.render('pages/discover');
+});
+
+app.get('/account', (req, res) => {
+  res.render('pages/account', {user: req.session.user});
+});
+
 // Register new user
 app.post('/register', async (req, res) => {
   
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const { nickname } = req.body;
     const { email } = req.body;
     if (!email.endsWith('@colorado.edu')) {
       return res.render('pages/register', { message: 'Please use a valid CU email address.', error: true });
     }
     // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
     // - Danny
-    const query = 'INSERT INTO users (username, password) VALUES ($1, $2)';
+    const query = 'INSERT INTO users (username, password, nickname) VALUES ($1, $2, $3)';
 
-    await db.none(query, [email, hashedPassword]); 
+    await db.none(query, [email, hashedPassword, nickname]); 
     res.redirect('/login');
   } catch (err) {
     console.error(err);
@@ -128,8 +137,8 @@ app.post('/login', async (req, res) => {
           console.error('Error saving session:', err);
           return res.render('pages/login', { message: 'An unexpected error occurred. Please try again later.', error:true });
         }
-        res.redirect('/discover');
-      });
+        res.redirect('/account');
+      }); 
     } else {
       // Incorrect password, render login with an error message
       console.log(`Login attempt failed: Incorrect password for user "${username}".`);
