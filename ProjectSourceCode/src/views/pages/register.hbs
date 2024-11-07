@@ -26,12 +26,18 @@
       background-color: #fff9d7;
       color: #363636;
     }
+    .custom-title {
+      color: transparent;
+      background: linear-gradient(50deg, #ffffff,  50%, #CFB87C);
+      -webkit-background-clip: text;
+      padding-bottom: 2px;
+    }
   </style>
 </head>
 <body data-bs-theme="dark" class="d-flex flex-column min-vh-100">
 
   <div class="container d-flex justify-content-center align-items-center flex-column" style="height: 80vh;">
-    <h1 class="mb-4">Create an account</h1>
+    <h1 class="mb-4 custom-title">Sign up</h1>
     <form method="POST" action="/register" class="w-50">
       <div class="mb-3">
         {{> message}}
@@ -43,9 +49,9 @@
         <label for="password" class="form-label">Password</label>
         <input type="password" class="form-control" id="password" name="password" required>
       </div>
-      <button type="submit" class="btn custom-btn transition">Complete Registration</button>
+      <button type="submit" class="btn custom-btn transition">Finish Sign Up</button>
     </form>
-    <p>Done registering? Go back to <a href="/login">Login</a>.</p>
+    <p>Done registering? Go back to <a href="/login">The sign in page</a>.</p>
   </div>
 
   
