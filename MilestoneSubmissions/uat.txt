@@ -1,0 +1,14 @@
+There are three features that we are:
+    1. Succesfully registering a new user/Rejecting an alreaedy existing user.
+    
+    Positive Test Case: Inputs three variables, nickname, email, and password. If the email is not registered, will pass into the discover page.
+    Negative Test Case:Inputs three variables, nickname, email, and password. If the email is registered, will pass as an invalid input and will call an invalid email.
+
+    2. Redirection to login with 302 HTTP status code
+
+    Test Case: Fetches status code, if status code is 302, it succesfully returns to login page.
+   
+    3. Testing login to render with an HTML response
+
+    Test Case: Fetches login code, and checks both status and html response. If succesful, should be true for both cases.
+    
