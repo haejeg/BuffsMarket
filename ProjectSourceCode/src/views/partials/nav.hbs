@@ -18,19 +18,24 @@
       background-color: #CFB87C;
     }
     .nav-link {
-      color: aliceblue !important;
+      color: #312f2f !important;
     }
     .nav-link:hover {
       color: gray !important;
     }
-    
+    .nav-spacing {
+      padding-top: 2px !important;
+      color: transparent !important;
+      background: linear-gradient(50deg, #030303,  50%, #312f2f) !important;
+      -webkit-background-clip: text !important;
+    }
   </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
   <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container-fluid">
-      <a1 class="navbar-brand" href="#">Buffsmarket</a1>
+      <a1 class="navbar-brand nav-spacing" href="#">BuffsMarket</a1>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -43,14 +48,16 @@
             <a class="nav-link transition" href="/messages">Messages</a>
           </li>
         </ul>
-
+        {{#if user}}
         <!-- Add search bar and account link -->
         <form class="d-flex me-3" method="GET" action="/search">
           <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-dark" type="submit">Search</button>
         </form>
-
+        
+               
         <a href="/account" class="nav-link text-dark">user@colorado.edu</a>
+        {{/if}}
       </div>
     </div>
   </nav>
