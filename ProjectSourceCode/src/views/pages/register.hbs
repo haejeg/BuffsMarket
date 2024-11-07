@@ -42,18 +42,19 @@
     <div class="mb-3">
         <label for="nickname" class="form-label">Nickname</label> 
         <input type="nickname" class="form-control" id="nickname" name="nickname" required>
-        <small class="form-text text-muted transition">Username must be appropriate</small> 
+        <small class="form-text text-muted transition">Username must be appropriate.</small> 
       </div>
       <div class="mb-3">
         {{> message}}
         <label for="email" class="form-label">Email</label> 
         {{!-- <input type="email" class="form-control" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@colorado\.edu$" required> --}}
         <input type="email" class="form-control" id="email" name="email" pattern="^[a-zA-Z0-9._%+\\-]+@colorado\.edu$" required>
-        <small class="form-text text-muted transition">Email must end with "@colorado.edu".</small> 
+        <small class="form-text text-muted transition">Email must end with "@colorado.edu."</small> 
       </div>
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
         <input type="password" class="form-control" id="password" name="password" required>
+        <small class="form-text text-muted transition">Do not use your colorado school password.</small> 
       </div>
       <button type="submit" class="btn custom-btn transition">Finish Sign Up</button>
     </form>
