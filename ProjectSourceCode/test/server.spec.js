@@ -41,7 +41,7 @@ describe('Server!', () => {
 
 
   //We are checking POST /add_user API by passing the user info in in incorrect manner (name cannot be an integer). This test case should pass and return a status 400 along with a "Invalid input" message.
-
+  
   describe('Testing Add User API', () => {
     it('positive: successfully registers a new user', done => {
         chai
@@ -58,16 +58,29 @@ describe('Server!', () => {
               done();
           });
     });
-});
+  });
 
 
-    // Example Negative Testcase :
-    // API: /add_user
-    // Input: {id: 5, name: 10, dob: '2020-02-20'}
-    // Expect: res.status == 400 and res.body.message == 'Invalid input'
-    // Result: This test case should pass and return a status 400 along with a "Invalid input" message.
-    // Explanation: The testcase will call the /add_user API with the following invalid inputs
-    // and expects the API to return a status of 400 along with the "Invalid input" message.
+  describe('Testing Add User API', () => {   //NEW TEST
+    it('Negative : /register. Checking invalid email address (no @colorado.edu)', done => {
+      chai
+        .request(server)
+        .post('/register')
+        .send({
+          nickname: 'Nettspend5', 
+          email: 'chungus5@gmail.com', 
+          password: 'KenBoneStillWater'
+      })
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.text).to.include('Please use a valid CU email address.');
+          done();
+        });
+    });
+  });
+
+
+
     describe('Testing Add User API', () => {
       it('negative: fails to register with an existing email', done => {
           chai
