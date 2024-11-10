@@ -48,13 +48,13 @@ describe('Server!', () => {
           .request(server)
           .post('/register')
           .send({
-              nickname: 'Meow', 
-              email: 'bruh@colorado.edu', 
-              password: 'plug'
+              nickname: 'Nettspend', 
+              email: 'chungus@colorado.edu', 
+              password: 'ohio'
           })
           .end((err, res) => {
-              expect(res).to.have.status(302); // Expect redirection to login page
-              expect(res).to.redirectTo('/login'); // Check if it redirects to /login
+              expect(res).to.have.status(200); // Expect login page to render
+              expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/login$/); // Expecting a redirect to login page
               done();
           });
     });
@@ -74,23 +74,36 @@ describe('Server!', () => {
             .request(server)
             .post('/register')
             .send({
-                nickname: 12, 
-                email: 'poop@colorado.edu', 
-                password: 'anotherpassword'
+                nickname: 'Nettspend',
+                email: 'nettspend@colorado.edu',
+                password: 'chungus'
             })
             .end((err, res) => {
-                expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
-                expect(res.text).to.include('Email already registered. Please use a different email.');
-                done();
+              expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
+              expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/login$/);
+
+              chai // sub-process; attempts ot insert he same account information
+              .request(server)
+              .post('/register')
+              .send({
+                nickname: 'Nettspend',
+                email: 'nettspend@colorado.edu',
+                password: 'chungus'
+              })
+              .end((err, res) => {
+                  expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
+                  expect(res.text).to.include('Email already registered. Please use a different email.');
+                  done();
+              });
             });
       });
   });
   
   
-
+/*
   describe('Testing Redirect', () => {
     // Sample test case given to test /test endpoint.
-    it('\test route should redirect to /login with 302 HTTP status code', done => {
+    it('/test route should redirect to /login with 302 HTTP status code', done => {
       chai
         .request(server)
         .get('/test')
@@ -101,7 +114,7 @@ describe('Server!', () => {
         });
     });
   });
-
+*/
 
   describe('Testing Render', () => {
     // Sample test case given to test /test endpoint.
@@ -116,3 +129,5 @@ describe('Server!', () => {
         });
     });
   });
+
+

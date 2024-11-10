@@ -217,4 +217,5 @@ function auth(req, res, next) {
 //   console.log('Server is listening on port 3000');
 // });
 
+//app.listen(3000);
 module.exports = app.listen(3000);
