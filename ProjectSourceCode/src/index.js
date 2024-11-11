@@ -67,7 +67,7 @@ app.use(
 
 // Home redirect
 app.get('/', (req, res) => {
-  res.redirect('login');
+  res.status(302).redirect('/login');
 });
 
 // Login page
