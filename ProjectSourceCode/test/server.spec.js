@@ -206,7 +206,7 @@ describe('Server!', () => {
               password: 'invalid_password'
             })
             .end((err, res) => {
-              console.log("Response text:", res.text);
+              //console.log("Response text:", res.text);
 
               const email = 'correct_email_invalid_password@colorado.edu'
               expect(res).to.have.status(400);
