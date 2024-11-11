@@ -100,7 +100,7 @@ app.post('/register', async (req, res) => {
     }
     // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
     // - Danny
-    const query = 'INSERT INTO users (username, password, nickname) VALUES ($1, $2, $3)';
+    const query = 'INSERT INTO users (email, password, nickname) VALUES ($1, $2, $3)';
 
     await db.none(query, [email, hashedPassword, nickname]); 
     res.redirect('/login');
@@ -121,12 +121,13 @@ app.post('/login', async (req, res) => {
   // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
   // - Danny
   try {
-    const query = 'SELECT * FROM users WHERE username = $1';
+    const query = 'SELECT * FROM users WHERE email = $1';
     const user = await db.oneOrNone(query, [email]); 
 
     if (!user) {
-      console.log(`Login attempt failed: Username "${email}" not found.`);
-      return res.redirect('/register');
+      console.log(`Login attempt failed: Email: "${email}" not found.`);
+      //return res.redirect('/register');
+      return res.status(400).render('pages/login', { message: `Login attempt failed: Email: "${email}" not found.`, error:true });
     }
 
     const match = await bcrypt.compare(password, user.password);
@@ -141,8 +142,8 @@ app.post('/login', async (req, res) => {
       }); 
     } else {
       // Incorrect password, render login with an error message
-      console.log(`Login attempt failed: Incorrect password for user "${username}".`);
-      res.render('pages/login', { message: 'Incorrect username or password.', error:true });
+      console.log(`Login attempt failed: Incorrect password for user "${email}".`);
+      res.status(400).render('pages/login', { message: `Login attempt failed: Incorrect password for user "${email}".`, error:true });
     }
   } catch (err) {
     console.error('Error during login process:', err);

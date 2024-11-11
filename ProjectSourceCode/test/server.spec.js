@@ -183,6 +183,37 @@ describe('Server!', () => {
             })
         });
     });
+
+    it('Negative: test if entering in invalid password for existing account with correct email produces correct error message', done => {
+      chai
+        .request(server)
+        .post('/register')
+        .send({
+            nickname: 'correct_email_invalid_password',
+            email: 'correct_email_invalid_password@colorado.edu',
+            password: 'correct_password'
+        })
+        .end((err, res) => {
+          expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
+          expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/login$/);
+
+          chai
+            .request(server)
+            .post('/login')
+            .send({
+              nickname: 'correct_email_invalid_password',
+              email: 'correct_email_invalid_password@colorado.edu',
+              password: 'invalid_password'
+            })
+            .end((err, res) => {
+              console.log("Response text:", res.text);
+
+              const email = 'correct_email_invalid_password@colorado.edu'
+              expect(res).to.have.status(400);
+              expect(res.text).to.include(`Login attempt failed: Incorrect password for user &quot;${email}&quot;.`);
+                //expect(res.text).to.include(`Login attempt failed: Incorrect password for user &quot;correct_email_invalid_password@colorado.edu&quot;.`);
+              done();
+            })
+        })
+    })
   });
-
-
