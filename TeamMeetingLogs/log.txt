@@ -1,1 +1,9 @@
-Putting this so folder can show up in github
+Team Meeting 11/4/24:
+- Completly finished Lab 11, when we run docker compose we pass all the self-imposed tests.
+- Set up our project board and future milestones.
+- Sign up Page, Login page, Register page both work while still passing the test cases.
+- Have checks to make sure registered accounts are only colorado.edu accounts.
+- Still progressing the Database, but does store usernames and passwords.
+- Passes account information and further details into the home page.
+- Currently home page is just for testing purposes, future home page will be where the marketplace's core functions are set up.
+- Currently trying to progress on the database infrastructure and some of the front end work regarding setting up a board for items.
