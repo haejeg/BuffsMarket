@@ -10,7 +10,9 @@ VALUES
     (2, 'Antique Vase', 'A beautiful antique vase with intricate designs.', 250.00, 2, 2, 'available'),
     (3, 'Gaming Laptop', 'A powerful gaming laptop with a 16GB RAM.', 899.99, 3, 3, 'sold'),
     (1, 'Mountain Bike', 'A durable mountain bike for off-road trails.', 450.50, 7, 4, 'available'),
-    (2, 'Guitar', 'An acoustic guitar with a smooth sound.', 300.00, 10, 1, 'available');
+    (2, 'Guitar', 'An acoustic guitar with a smooth sound.', 300.00, 10, 1, 'available'),
+    (3, 'Physics textbook good condition', 'Physics textbook good condition.', 50.49, 1, 2, 'available'),
+    (1, 'Xbox Controller', 'Used Xbox Controller, open ot offers', 35.69, 1, 3, 'available');
 
 INSERT INTO listing_images (listing_id, image_url)
 VALUES
@@ -18,7 +20,9 @@ VALUES
     (2, '/img/Antique_vase.jpg'),
     (3, '/img/Gaming_laptop.jpg'),
     (4, '/img/Mountain_bike.jpg'),
-    (5, '/img/Guitar.jpg'); 
+    (5, '/img/Guitar.jpg'), 
+    (6, '/img/Physics_textbook.jpg'),
+    (7, '/img/Xbox_controller.jpg')
 
 
     -- /img/Old_camera.jpg  --
