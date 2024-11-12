@@ -97,6 +97,8 @@ describe('Server!', () => {
             password: 'chungus'
           })
           .end((err, res) => {
+              console.log("Response text:", res.text);
+
               expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
               expect(res.text).to.include('Email already registered. Please use a different email.');
               done();

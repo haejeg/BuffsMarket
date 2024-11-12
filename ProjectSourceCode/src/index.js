@@ -114,6 +114,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
+/*
 app.post('/register', async (req, res) => {
   
   try {
@@ -138,6 +139,7 @@ app.post('/register', async (req, res) => {
     }
   }
 });
+*/
 
 // Handle login
 app.post('/login', async (req, res) => {
@@ -182,7 +184,7 @@ app.get('/welcome', (req, res) => {
 
 
 
-
+/*
 app.get('/home', auth, async (req, res) => {
   try {
     const keyword = 'music'; // Example keyword; change as needed
@@ -209,7 +211,7 @@ app.get('/home', auth, async (req, res) => {
     res.render('pages/discover', { results: [], message: 'Failed to fetch events. Please try again later.', error:true });
   }
 });
-
+*/
 
 
 app.get('/logout', (req, res) => {
