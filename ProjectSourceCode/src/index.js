@@ -65,6 +65,9 @@ app.use(
 // <!-- Section 4 : API Routes -->
 // *****************************************************
 
+//fix image access
+app.use('/img', express.static('resources/img'));
+
 // Home redirect
 app.get('/', (req, res) => {
   res.status(302).redirect('/login');
@@ -80,9 +83,24 @@ app.get('/register', (req, res) => {
   res.render('pages/register');
 });
 
+app.get('/home', async (req, res) => {
+  try {
+    const query = `SELECT listings.id AS listing_id, listings.title, listings.price, listing_images.image_url
+    FROM listings
+    LEFT JOIN listing_images ON listings.id = listing_images.listing_id`;
+    const listings = await db.query(query);
+    res.render('pages/home', { listings });
+  } catch (error) {
+    console.error('Error fetching listings:', error);
+    res.status(500).send('Server Error');
+  }
+});
+
+/*
 app.get('/home', (req, res) => {
   res.render('pages/home', {user: req.session.user});
 });
+*/
 
 app.get('/account', (req, res) => {
   res.render('pages/account', {user: req.session.user});

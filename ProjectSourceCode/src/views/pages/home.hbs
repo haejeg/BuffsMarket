@@ -76,10 +76,10 @@
 
     <div class="container">
         <div class="grid-container">
-            <!-- Example listing items (loop over these in your template) -->
             {{#each listings}}
             <div class="listing-item">
                 <img src="{{this.image_url}}" alt="Listing Image" class="listing-image">
+                <!-- <img src="/img/Old_camera.jpg" alt="Test Image" class="listing-image"/> -->
                 <a href="/listing/{{this.id}}" class="listing-title">{{this.title}}</a>
                 <p class="listing-price">${{this.price}}</p>
             </div>

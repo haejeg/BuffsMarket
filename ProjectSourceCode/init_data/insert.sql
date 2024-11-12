@@ -14,8 +14,11 @@ VALUES
 
 INSERT INTO listing_images (listing_id, image_url)
 VALUES
-    (1, '/resources/img/Old_camera.jpg'),
-    (2, '/rsources/img/Antique_vase.jpg'),
-    (3, 'resources/img/Gaming_laptop.jpg'),
-    (4, 'resources/img/Mountain_bike.jpg'),
-    (5, 'resources/img/Guitar.jpg');   
+    (1, '/img/Old_camera.jpg'),
+    (2, '/img/Antique_vase.jpg'),
+    (3, '/img/Gaming_laptop.jpg'),
+    (4, '/img/Mountain_bike.jpg'),
+    (5, '/img/Guitar.jpg'); 
+
+
+    -- /img/Old_camera.jpg  --
