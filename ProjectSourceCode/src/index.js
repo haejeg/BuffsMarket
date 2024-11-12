@@ -85,7 +85,12 @@ app.get('/register', (req, res) => {
 
 app.get('/home', async (req, res) => {
   try {
-    const query = `SELECT listings.id AS listing_id, listings.title, listings.price, listing_images.image_url
+    const query = `SELECT 
+                  listings.id AS listing_id, 
+                  listings.title, 
+                  listings.price, 
+                  TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date, 
+                  listing_images.image_url
     FROM listings
     LEFT JOIN listing_images ON listings.id = listing_images.listing_id`;
     const listings = await db.query(query);
