@@ -92,7 +92,9 @@ app.get('/home', async (req, res) => {
                   TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date, 
                   listing_images.image_url
     FROM listings
-    LEFT JOIN listing_images ON listings.id = listing_images.listing_id`;
+    LEFT JOIN listing_images 
+    ON listings.id = listing_images.listing_id
+    AND listing_images.is_main = TRUE`;
     const listings = await db.query(query);
     res.render('pages/home', { listings });
   } catch (error) {

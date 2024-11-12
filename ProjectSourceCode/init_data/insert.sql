@@ -14,15 +14,15 @@ VALUES
     (3, 'Physics textbook good condition', 'Physics textbook good condition.', 50.49, 1, 2, 'available'),
     (1, 'Xbox Controller', 'Used Xbox Controller, open ot offers', 35.69, 1, 3, 'available');
 
-INSERT INTO listing_images (listing_id, image_url)
+INSERT INTO listing_images (listing_id, image_url, is_main)
 VALUES
-    (1, '/img/Old_camera.jpg'),
-    (2, '/img/Antique_vase.jpg'),
-    (3, '/img/Gaming_laptop.jpg'),
-    (4, '/img/Mountain_bike.jpg'),
-    (5, '/img/Guitar.jpg'), 
-    (6, '/img/Physics_textbook.jpg'),
-    (7, '/img/Xbox_controller.jpg')
+    (1, '/img/Old_camera.jpg', TRUE),
+    (2, '/img/Antique_vase.jpg', TRUE),
+    (3, '/img/Gaming_laptop.jpg', TRUE),
+    (4, '/img/Mountain_bike.jpg', TRUE),
+    (5, '/img/Guitar.jpg', TRUE), 
+    (6, '/img/Physics_textbook.jpg', TRUE),
+    (7, '/img/Xbox_controller.jpg', TRUE);
 
 
     -- /img/Old_camera.jpg  --

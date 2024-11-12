@@ -22,8 +22,13 @@ CREATE TABLE IF NOT EXISTS listings (
 CREATE TABLE IF NOT EXISTS listing_images (
     id SERIAL PRIMARY KEY,
     listing_id INT REFERENCES listings(id) ON DELETE CASCADE,
-    image_url VARCHAR(255) NOT NULL
+    image_url VARCHAR(255) NOT NULL,
+    is_main BOOLEAN DEFAULT FALSE
 );
+
+CREATE UNIQUE INDEX unique_main_image_per_listing -- Only allows one main image per lisitng (the image that is displayed on the home page) --
+ON listing_images (listing_id)
+WHERE is_main = TRUE;
 
 CREATE TABLE IF NOT EXISTS purchases (
     id SERIAL PRIMARY KEY,
