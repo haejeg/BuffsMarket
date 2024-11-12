@@ -80,8 +80,8 @@ app.get('/register', (req, res) => {
   res.render('pages/register');
 });
 
-app.get('/discover', (req, res) => {
-  res.render('pages/discover');
+app.get('/home', (req, res) => {
+  res.render('pages/home', {user: req.session.user});
 });
 
 app.get('/account', (req, res) => {
@@ -114,6 +114,30 @@ app.post('/register', async (req, res) => {
   }
 });
 
+app.post('/register', async (req, res) => {
+  
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const { nickname } = req.body;
+    const { email } = req.body;
+    if (!email.endsWith('@colorado.edu')) {
+      return res.status(400).render('pages/register', { message: 'Please use a valid CU email address.', error: true });
+    }
+    // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
+    // - Danny
+    const query = 'INSERT INTO users (email, password, nickname) VALUES ($1, $2, $3)';
+
+    await db.none(query, [email, hashedPassword, nickname]); 
+    res.redirect('/login');
+  } catch (err) {
+    console.error(err);
+    if (err.code === '23505') { // PostgreSQL unique violation error code
+      res.render('pages/register', { message: 'Email already registered. Please use a different email.', error: true });
+    } else {
+      res.status(500).send('Error registering user');
+    }
+  }
+});
 
 // Handle login
 app.post('/login', async (req, res) => {
@@ -159,7 +183,7 @@ app.get('/welcome', (req, res) => {
 
 
 
-app.get('/discover', auth, async (req, res) => {
+app.get('/home', auth, async (req, res) => {
   try {
     const keyword = 'music'; // Example keyword; change as needed
     const size = 10; // Number of events to fetch
