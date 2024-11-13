@@ -16,7 +16,8 @@ VALUES
 
 INSERT INTO listing_images (listing_id, image_url, is_main)
 VALUES
-    (1, '/img/Old_camera.jpg', TRUE),
+    (1, '/img/Old_camera1.jpg', TRUE),
+    (1, '/img/Old_camera2.jpg', FALSE),
     (2, '/img/Antique_vase.jpg', TRUE),
     (3, '/img/Gaming_laptop.jpg', TRUE),
     (4, '/img/Mountain_bike.jpg', TRUE),

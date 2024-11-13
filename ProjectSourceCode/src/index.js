@@ -85,20 +85,55 @@ app.get('/register', (req, res) => {
 
 app.get('/home', async (req, res) => {
   try {
-    const query = `SELECT 
-                  listings.id AS listing_id, 
-                  listings.title, 
-                  listings.price, 
-                  TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date, 
-                  listing_images.image_url
+    const query = 
+    `SELECT 
+      listings.id AS listing_id, 
+      listings.title, 
+      listings.price, 
+      TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date, 
+      listing_images.image_url
     FROM listings
     LEFT JOIN listing_images 
     ON listings.id = listing_images.listing_id
     AND listing_images.is_main = TRUE`;
     const listings = await db.query(query);
+    //console.log('Listings data:', listings);
     res.render('pages/home', { listings });
   } catch (error) {
     console.error('Error fetching listings:', error);
+    res.status(500).send('Server Error');
+  }
+});
+
+app.get('/listing', async (req, res) => {
+  try {
+    const listing_id = req.query.id;
+    console.log('Received listing ID:', listing_id); // Log the received ID
+
+    if(!listing_id){
+      return res.status(400).send('Listing ID not present.');
+    }
+
+    const listing_query = `SELECT 
+      listings.id AS listing_id, 
+      listings.title, 
+      listings.price, 
+      listings.description, 
+      listings.created_at AS created_date 
+    FROM listings WHERE listings.id = $1
+    LIMIT 1`;
+    const result = await db.query(listing_query, [listing_id]);
+    const listing = result[0];
+    
+    const images_query = `SELECT listing_images.image_url, listing_images.is_main FROM listing_images WHERE listing_images.listing_id = $1`;
+    const listing_images = await db.query(images_query, [listing_id]);
+
+    console.log('Listing:', listing);
+
+    res.render('pages/listing', { listing, listing_images });
+
+  } catch (error) {
+    console.error('Error fetching listing:', error);
     res.status(500).send('Server Error');
   }
 });

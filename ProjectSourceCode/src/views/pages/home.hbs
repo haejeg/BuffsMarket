@@ -88,7 +88,7 @@
     <div class="container">
         <div class="grid-container">
             {{#each listings}}
-            <a href="/listing/{{this.id}}" class="listing-item">
+            <a href="/listing?id={{this.listing_id}}" class="listing-item">
                 <img src="{{this.image_url}}" alt="Listing Image" class="listing-image">
                 <!-- <img src="/img/Old_camera.jpg" alt="Test Image" class="listing-image"/> -->
                 <p class="listing-price">${{this.price}}</p>
