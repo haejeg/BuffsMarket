@@ -83,7 +83,7 @@ app.get('/register', (req, res) => {
   res.render('pages/register');
 });
 
-app.get('/home', async (req, res) => {
+app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only logged in users can access certain pages
   try {
     const query = 
     `SELECT 
