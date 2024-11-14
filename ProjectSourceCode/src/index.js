@@ -98,7 +98,7 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
     AND listing_images.is_main = TRUE`;
     const listings = await db.query(query);
     //console.log('Listings data:', listings);
-    res.render('pages/home', { listings });
+    res.render('pages/home', { listings , user: req.session.user});
   } catch (error) {
     console.error('Error fetching listings:', error);
     res.status(500).send('Server Error');
@@ -138,11 +138,10 @@ app.get('/listing', async (req, res) => {
   }
 });
 
-/*
-app.get('/home', (req, res) => {
-  res.render('pages/home', {user: req.session.user});
-});
-*/
+// app.get('/home', (req, res) => {
+//   res.render('pages/home', {});
+// });
+
 
 app.get('/account', (req, res) => {
   res.render('pages/account', {user: req.session.user});

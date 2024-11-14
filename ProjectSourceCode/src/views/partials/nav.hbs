@@ -48,19 +48,17 @@
             <a class="nav-link transition" href="/messages">Messages</a>
           </li>
         </ul>
-        {{#if user}}
+        {{#if user.nickname}}
         <!-- Search bar and account link -->
         <form class="d-flex me-3" method="GET" action="/search">
           <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-dark" type="submit">Search</button>
         </form>
-        
-        <a href="/account" class="nav-link text-dark"> {{user.nickname}} </a>        
-        {{/if}}
-        {{!-- this should later be within the #if user statement - d --}}
         <button type="button" class="btn btn-dark ms-2" data-bs-toggle="modal" data-bs-target="#createListingModal">
           Create new listing
         </button>
+        <a href="/account" class="nav-link text-dark"> {{user.nickname}} </a>        
+        {{/if}}
       </div>
     </div>
   </nav>
