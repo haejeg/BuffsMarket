@@ -174,6 +174,36 @@ app.post('/register', async (req, res) => {
   }
 });
 
+
+app.post('/home', async (req, res) => {
+  try {
+    console.log("CREATING NEW OBJECT...");
+    const { item_name, description, pricing } = req.body;
+    const time = new Date().toISOString();
+    const status = "available";
+
+    // Retrieve the highest id and increment it -d
+    // we also should do something similar for userid -d
+    const result = await db.one('SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM listings');
+    const nextId = result.next_id;
+    // we need to add image upload somehow if somebody can figure that out -d
+    const query = 'INSERT INTO listings (id, title, description, price, created_at, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+    const values = [nextId, item_name, description, pricing, time, time, status];
+
+    await db.none(query, values);
+    res.redirect('/home');
+  } catch (err) {
+    console.error(err);
+    if (err.code === '23505') { // PostgreSQL unique violation error code
+      res.render('pages/home', { message: 'Product already registered. Please use a different product.', error: true }); // i copied this from register but i'm not sure if this is needed
+    } else {
+      res.status(500).send('Error creating listing');
+    }
+  }
+});
+
+
+
 /*
 app.post('/register', async (req, res) => {
   
