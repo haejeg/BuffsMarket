@@ -190,6 +190,15 @@
             <p class="listing-price">${{listing.price}}</p>
             <p class="listing-description">{{listing.description}}</p>
             <p class="listing-date">Listed on: {{listing.created_date}}</p>
+
+            <a href="/purchase?id={{this.listing_id}}" style="text-decoration: none;">
+                <form action="/purchase" method="GET" style="display: inline;">
+                    <input type="hidden" name="id" value="{{this.listing_id}}">
+                    <button type="submit" class="custom-btn">Purchase</button>
+                </form>
+            </a>
+
+
         </div>
 
     </div>

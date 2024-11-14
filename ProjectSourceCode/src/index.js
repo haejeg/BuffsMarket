@@ -231,6 +231,29 @@ app.post('/register', async (req, res) => {
 });
 */
 
+app.get('/purchase', async (req, res) => {
+  const { id } = req.query;  // Get the 'id' from the query parameter
+
+  // if (!id) {
+  //     return res.status(400).send('listing ID is required');
+  // }
+
+  try {
+      const listing = await db.query('SELECT * FROM listings WHERE id = $1', [id]);
+      
+          // Render the purchase page with the listing data
+          res.render('pages/purchase', { listing: listing[0] }); // Assuming you're passing the first element if multiple results
+
+  } catch (error) {
+      console.error('Error fetching listing:', error);
+      res.status(500).send('Server error');
+  }
+});
+
+
+
+
+
 // Handle login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body; 
