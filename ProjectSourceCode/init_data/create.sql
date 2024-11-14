@@ -12,10 +12,10 @@ CREATE TABLE IF NOT EXISTS listings (
     description TEXT NOT NULL, 
     price DECIMAL(7, 2) NOT NULL,
     quantity INT, 
-    category_id INT, -- i think this is better with no NOT NULL
+    category_id INT, -- i think this is better with no NOT NULL - d
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, -- why is this in GMT? someone fix? - d
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, -- shouldn't this be ok with NULL? - d
-    status VARCHAR(50) NOT NULL -- we need good naming conventions for status
+    status VARCHAR(50) NOT NULL -- we need good naming conventions for status - d
 );
 
 CREATE TABLE IF NOT EXISTS listing_images (

@@ -195,7 +195,7 @@ app.post('/home', async (req, res) => {
   } catch (err) {
     console.error(err);
     if (err.code === '23505') { // PostgreSQL unique violation error code
-      res.render('pages/home', { message: 'Product already registered. Please use a different product.', error: true }); // i copied this from register but i'm not sure if this is needed
+      res.render('pages/home', { message: 'Product already registered. Please use a different product.', error: true }); // i copied this from register but i'm not sure if this is needed -d
     } else {
       res.status(500).send('Error creating listing');
     }
