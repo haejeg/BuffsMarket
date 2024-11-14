@@ -23,6 +23,10 @@
     .nav-link:hover {
       color: gray !important;
     }
+    .text-spacing {
+      padding-left: 15px !important;
+      padding-right: 5px !important;
+    }
     .nav-spacing {
       padding-top: 2px !important;
       color: transparent !important;
@@ -57,7 +61,9 @@
         <button type="button" class="btn btn-dark ms-2" data-bs-toggle="modal" data-bs-target="#createListingModal">
           Create new listing
         </button>
-        <a href="/account" class="nav-link text-dark"> {{user.nickname}} </a>        
+        <div>
+          <a href="/account" class="nav-link text-dark text-spacing"> {{user.nickname}} </a> 
+        </div>
         {{/if}}
       </div>
     </div>
