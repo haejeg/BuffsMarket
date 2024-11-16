@@ -91,11 +91,39 @@
               <input type="text" class="form-control" id="description" name="description" required>
             </div>
             <div class="mb-3">
+            <!-- Image Upload -->
+              <input type="file" id="imageUpload" name="image" accept="image/*" />
+              <div id="uploadStatus"></div> <!-- To show upload status -->
+            </div>
+            <div class="mb-3">
               <label for="pricing" class="form-label">Item Price</label>
               <input type="number" min="0.00" step="0.01" class="form-control" id="pricing" name="pricing" required>
             </div>
             <button type="submit" class="btn custom-btn transition">Create Listing</button>
           </form>
+            <script>
+              document.getElementById('imageUpload').addEventListener('change', async function () {
+                const fileInput = this;
+                const file = fileInput.files[0];
+                if (file) {
+                  const formData = new FormData();
+                  formData.append('image', file);
+
+                  try {
+                    const response = await fetch('/upload', {
+                      method: 'POST',
+                      body: formData
+                    });
+
+                    const result = await response.text();
+                    document.getElementById('uploadStatus').innerText = result;
+                  } catch (error) {
+                    console.error('Error uploading image:', error);
+                    document.getElementById('uploadStatus').innerText = 'Image upload failed';
+                  }
+                }
+              });
+            </script>
         </div>
       </div>
     </div>

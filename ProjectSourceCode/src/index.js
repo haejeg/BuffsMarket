@@ -11,6 +11,9 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const axios = require('axios');
+const multer = require('multer');
+const fs = require('fs');
+
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -104,6 +107,35 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
     res.status(500).send('Server Error');
   }
 });
+
+// Configure multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // 'uploads' is the directory where files will be stored
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
+// Endpoint to handle file upload
+app.post('/upload', upload.single('image'), (req, res) => {
+  if (req.file) {
+    // Save file information to the database (if needed)
+    console.log('File uploaded:', req.file); // Check the file object
+    const filePath = req.file.path;
+
+    // Assuming you have a function to save the filePath to your database
+    saveImageToDatabase(filePath);
+
+    res.send('Image uploaded successfully!');
+  } else {
+    res.status(400).send('No file uploaded');
+  }
+});
+
 
 app.get('/listing', async (req, res) => {
   try {
