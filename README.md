@@ -6,9 +6,11 @@ BuffsMarket is a dedicated platform exclusively for CU Boulder students, providi
 ## Vision Statement
 For college students, Who attend CU Boulder and buy and sell different items. The Buffs MarketPlace is an online shop that allows students to buy and sell items safely. 
 Unlike eBay or using the Snapchat stories, our product is a marketplace specifically for the students of CU Boulder.
-## Release Notes Nov 17, 2024
-- Ability to add listing within the website with an associated image
-- Major CSS changes to listings pages and home pages
+## Release Notes Nov 18, 2024
+- Home page with a grid layout of items for sale
+- Listings page with a slideshow for pictures
+- A create new listing function with uploading images
+- (in progress) a purchase page for listings, and pinning items that you have recently looked at
 ## Release Notes Nov 11, 2024
 - Ability to register to BuffsMarket with username, email, and password
 - Ability to login with registered email and password
