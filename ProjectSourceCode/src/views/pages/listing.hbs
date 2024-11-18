@@ -191,11 +191,13 @@
             <p class="listing-description">{{listing.description}}</p>
             <p class="listing-date">Listed on: {{listing.created_date}}</p>
 
-            <a href="/purchase?id={{this.listing_id}}" class="purchase-item">
-                    <input type="hidden" name="id" value="{{this.listing_id}}">
-                    <button type="submit" class="custom-btn">Purchase</button>
-                </form>
-            </a>
+        <form action="/cart/add" method="POST" style="display: inline;">
+                <input type="hidden" name="id" value="{{listing.id}}">
+                <input type="hidden" name="title" value="{{listing.title}}">
+                <input type="hidden" name="price" value="{{listing.price}}">
+                <input type="hidden" name="image_url" value="{{listing.image_url}}">
+                <button type="submit" class="custom-btn">Add to Cart</button>
+        </form>
             {{!-- <a href="/listing?id={{this.listing_id}}" class="listing-item">
                 <img src="{{this.image_url}}" alt="Listing Image" class="listing-image">
                 <!-- <img src="/img/Old_camera.jpg" alt="Test Image" class="listing-image"/> -->

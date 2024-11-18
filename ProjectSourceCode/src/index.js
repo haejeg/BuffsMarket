@@ -83,6 +83,28 @@ app.get('/register', (req, res) => {
   res.render('pages/register');
 });
 
+app.get('/cart', (req, res) => {
+  const cart = req.session.cart || []; 
+  res.render('pages/cart', { cart });
+});
+
+
+//adding to the cart
+app.post('/cart/add', (req, res) => {
+  const { id, title, price, image_url } = req.body;
+
+
+  if (!req.session.cart) {
+      req.session.cart = [];
+  }
+
+
+  req.session.cart.push({ id, title, price, image_url });
+
+  console.log('cart:', req.session.cart); 
+  res.redirect('/cart'); 
+});
+
 app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only logged in users can access certain pages
   try {
     const query = 

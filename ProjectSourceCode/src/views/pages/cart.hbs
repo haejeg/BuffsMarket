@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .cart-item {
+            border: 1px solid #CFB87C;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-item img {
+            width: 100px;
+            height: auto;
+            margin-right: 10px;
+        }
+        .cart-item-details {
+            flex: 1;
+        }
+        .cart-total {
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Cart</h1>
+    <div class="cart-container">
+        {{#each cart}}
+        <div class="cart-item">
+            <img src="{{this.image_url}}" alt="{{this.title}}">
+            <div class="cart-item-details">
+                <h2>{{this.title}}</h2>
+                <p>Price: ${{this.price}}</p>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    <p class="cart-total">Total: ${{#each cart}}{{@root.totalPrice (this.price)}}{{/each}}</p>
+</body>
+</html>
