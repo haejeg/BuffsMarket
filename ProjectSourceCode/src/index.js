@@ -14,7 +14,8 @@ const axios = require('axios');
 const multer = require('multer');
 const fs = require('fs');
 
-
+// Configure Multer for file uploads
+const upload = multer({ dest: 'uploads/' }); // Files will be temporarily saved in 'uploads' directory
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
@@ -108,34 +109,53 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
   }
 });
 
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // 'uploads' is the directory where files will be stored
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
+// Import the Google Cloud client library
+const { Storage } = require('@google-cloud/storage');
+
+// Initialize a Storage client with the credentials
+const storage = new Storage({
+  keyFilename: 'melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
-const upload = multer({ storage });
+// Function to upload an image
+async function uploadImage(bucketName, filePath, destination) {
+  try {
+    // Uploads a file to the bucket
+    await storage.bucket(bucketName).upload(filePath, {
+      destination: destination, // Destination in the bucket
+    });
 
-// Endpoint to handle file upload
-app.post('/upload', upload.single('image'), (req, res) => {
-  if (req.file) {
-    // Save file information to the database (if needed)
-    console.log('File uploaded:', req.file); // Check the file object
-    const filePath = req.file.path;
+    console.log(`${filePath} uploaded to ${bucketName}/${destination}`);
+  } catch (error) {
+    console.error('Error uploading the file:', error);
+  }
+}
 
-    // Assuming you have a function to save the filePath to your database
-    saveImageToDatabase(filePath);
+// Usage example
+const bucketName = 'buffm_images'; // Replace with your bucket name
 
-    res.send('Image uploaded successfully!');
-  } else {
-    res.status(400).send('No file uploaded');
+
+
+// Route to handle file uploads
+app.post('/uploadImage', upload.single('image'), async (req, res) => {
+  const filePath = req.file.path; // The temporary file path created by multer
+  const originalFileName = req.file.originalname;
+  const destination = originalFileName; // You can modify this if you want to rename it on GCS
+
+  try {
+    // Upload the file to Google Cloud Storage
+    await storage.bucket(bucketName).upload(filePath, {
+      destination: destination,
+    });
+    res.send(`${originalFileName} uploaded to ${bucketName}/${destination}`);
+    imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+// Save this imageUrl along with other listing data in your database
+
+  } catch (error) {
+    console.error('Error uploading the file:', error);
+    res.status(500).send('Failed to upload image');
   }
 });
-
 
 app.get('/listing', async (req, res) => {
   try {
