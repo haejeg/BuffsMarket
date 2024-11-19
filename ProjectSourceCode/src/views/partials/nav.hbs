@@ -107,10 +107,10 @@
                 const file = fileInput.files[0];
                 if (file) {
                   const formData = new FormData();
-                  formData.append('image', file);
+                  formData.append('image', file); // 'image' should match the field name in multer config (upload.single('image'))
 
                   try {
-                    const response = await fetch('/upload', {
+                    const response = await fetch('/uploadImage', {
                       method: 'POST',
                       body: formData
                     });
