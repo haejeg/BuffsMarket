@@ -110,6 +110,63 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
   }
 });
 
+
+// Update Nickname
+app.post('/account/update-nickname', auth, async (req, res) => {
+  //this is pretty nice, im thinking we could have an anoymous mode vs non anoymous mode or sum like that lol
+  const { nickname } = req.body;
+  const userId = req.session.user.id; // Assuming `id` is the user's primary key in the session
+  try {
+    const query = 'UPDATE users SET nickname = $1 WHERE id = $2';
+    await db.none(query, [nickname, userId]);
+    req.session.user.nickname = nickname; // Update session data
+    res.redirect('/account');
+  } catch (err) {
+    console.error('Error updating nickname:', err);
+    res.status(500).render('pages/account', { user: req.session.user, message: 'Error updating nickname', error: true });
+  }
+});
+
+// Update Email
+app.post('/account/update-email', auth, async (req, res) => {
+  //i dont think we need this but i added it anyways?
+  const { email } = req.body;
+  const userId = req.session.user.id;
+  try {
+    if (!email.endsWith('@colorado.edu')) {
+      return res.status(400).render('pages/account', { user: req.session.user, message: 'Please use a valid CU email address.', error: true });
+    }
+    const query = 'UPDATE users SET email = $1 WHERE id = $2';
+    await db.none(query, [email, userId]);
+    req.session.user.email = email; // Update session data
+    res.redirect('/account');
+  } catch (err) {
+    console.error('Error updating email:', err);
+    if (err.code === '23505') { // Handle unique constraint violation
+      res.render('pages/account', { user: req.session.user, message: 'Email already registered. Please use a different email.', error: true });
+    } else {
+      res.status(500).render('pages/account', { user: req.session.user, message: 'Error updating email', error: true });
+    }
+  }
+});
+
+// Update Password
+app.post('/account/update-password', auth, async (req, res) => {
+  // we need to make it so that password has a verification for old password
+  const { password } = req.body;
+  const userId = req.session.user.id;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash new password
+    const query = 'UPDATE users SET password = $1 WHERE id = $2';
+    await db.none(query, [hashedPassword, userId]);
+    res.redirect('/account');
+  } catch (err) {
+    console.error('Error updating password:', err);
+    res.status(500).render('pages/account', { user: req.session.user, message: 'Error updating password', error: true });
+  }
+});
+
+
 // Import the Google Cloud client library
 const { Storage } = require('@google-cloud/storage');
 
