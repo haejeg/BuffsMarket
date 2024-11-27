@@ -5,18 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base href="/">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <title>Buff Marketplace</title>
+  <title>Edit Account</title>
   <style>
-    .transition{
-      transition: all .4s !important;
-      -moz-transition: all .4s !important;
-      -webkit-transition:all .4s !important;
-      -o-transition: all .4s !important;
-      position:relative !important; 
-    }
-    small:hover {
-      color: rgb(82, 80, 70) !important;
-    }
     .custom-btn {
       background-color: #CFB87C;
       color: #fff;
@@ -27,32 +17,61 @@
     }
     .custom-title {
       color: transparent;
-      background: linear-gradient(50deg, #ffffff,  50%, #CFB87C);
+      background: linear-gradient(50deg, #ffffff, 50%, #CFB87C);
       -webkit-background-clip: text;
       padding-bottom: 2px;
+    }
+    .form-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-inline label {
+      width: 100px; /* Align labels */
+      text-align: right; /* Right-align text */
+    }
+    .form-inline input {
+      flex-grow: 1; /* Ensure input boxes fill the space */
+    }
+    .container {
+      max-width: 600px;
+      {{!-- margin: /* Center the container */ --}}
     }
   </style>
 </head>
 <body data-bs-theme="dark" class="d-flex flex-column min-vh-100">
-  <div class="container d-flex justify-content-center align-items-center flex-column" style="height: 80vh;">
-    <h1 class="mb-4 custom-title">Welcome back! {{user.nickname}}</h3> 
+  <div class="container d-flex flex-column align-items-center" style="padding-top: 50px;">
+    <h1 class="mb-4 custom-title">Edit Your Account</h1>
     {{> message }}
-    {{!-- <form method="POST" action="/login" class="w-50">
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label> 
-        <input type="email" class="form-control" id="email" name="email" required> 
+
+    <!-- Nickname Form -->
+    <form method="POST" action="/account/update-nickname" class="w-100 mb-4">
+      <div class="form-inline">
+        <label for="nickname" class="form-label">Nickname</label>
+        <input type="text" class="form-control" id="nickname" name="nickname" value="{{user.nickname}}" required>
+        <button type="submit" class="btn custom-btn">Update</button>
       </div>
-      <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" name="password" required>
-      </div>
-      <button type="submit" class="btn custom-btn">Login</button>
     </form>
-    <p>Don't have an account? <a href="/register">Register here</a>.</p>
-  </div> --}}
 
+    <!-- Email Form -->
+    <form method="POST" action="/account/update-email" class="w-100 mb-4">
+      <div class="form-inline">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" required>
+        <button type="submit" class="btn custom-btn">Update</button>
+      </div>
+    </form>
 
- 
+    <!-- Password Form -->
+    <form method="POST" action="/account/update-password" class="w-100 mb-4">
+      <div class="form-inline">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password" required>
+        <button type="submit" class="btn custom-btn">Update</button>
+      </div>
+    </form>
+  </div>
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
 </body>
