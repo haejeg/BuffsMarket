@@ -20,6 +20,20 @@ const upload = multer({ dest: 'uploads/' }); // Files will be temporarily saved 
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
 
+// const pgSession = require('connect-pg-simple')(session);
+
+// app.use(
+//   session({
+//     store: new pgSession({
+//       conString: process.env.DATABASE_URL, // or use your Render DB connection URL
+//     }),
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: false,
+//   })
+// );
+
+
 const hbs = handlebars.create({
   extname: 'hbs',
   layoutsDir: path.join(__dirname, 'views/layouts'),

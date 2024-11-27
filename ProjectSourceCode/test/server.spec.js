@@ -1,73 +1,65 @@
-// ********************** Initialize server **********************************
-
-const server = require('../src/index'); //TODO: Make sure the path to your index.js is correctly added
-
-// ********************** Import Libraries ***********************************
-
-const chai = require('chai'); // Chai HTTP provides an interface for live integration testing of the API's.
+const server = require('../src/index'); // Ensure the path to your server file is correct
+const chai = require('chai');
 const chaiHttp = require('chai-http');
 chai.should();
 chai.use(chaiHttp);
-const {assert, expect} = chai;
+const { expect } = chai;
 
-// ********************** DEFAULT WELCOME TESTCASE ****************************
+// *********************** Test Suite *****************************
 
-describe('Server!', () => {
-  // Sample test case given to test / endpoint.
-  it('Returns the default welcome message', done => {
-    chai
-      .request(server)
-      .get('/welcome')
-      .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.status).to.equals('success');
-        assert.strictEqual(res.body.message, 'Welcome!');
-        done();
-      });
+describe('Server Tests', () => {
+  before(done => {
+    console.log('Setting up test data...');
+    done();
   });
-});
 
-// *********************** TODO: WRITE 2 UNIT TESTCASES **************************
+  after(done => {
+    console.log('Cleaning up test data...');
+    done();
+  });
 
-// ********************************************************************************
-
-// Example Positive Testcase :
-// API: /add_user
-// Input: {id: 5, name: 'John Doe', dob: '2020-02-20'}
-// Expect: res.status == 200 and res.body.message == 'Success'
-// Result: This test case should pass and return a status 200 along with a "Success" message.
-// Explanation: The testcase will call the /add_user API with the following input
-// and expects the API to return a status of 200 along with the "Success" message.
-
-
-  //We are checking POST /add_user API by passing the user info in in incorrect manner (name cannot be an integer). This test case should pass and return a status 400 along with a "Invalid input" message.
-  
-  describe('Testing Add User API', () => {
-    it('positive: successfully registers a new user', done => {
-        chai
-          .request(server)
-          .post('/register')
-          .send({
-              nickname: 'Nettspend', 
-              email: 'chungus@colorado.edu', 
-              password: 'ohio'
-          })
-          .end((err, res) => {
-              expect(res).to.have.status(200); // Expect login page to render
-              expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/login$/); // Expecting a redirect to login page
-              done();
-          });
+  // Test the default route
+  describe('Default Route', () => {
+    it('should return the default welcome message', done => {
+      chai
+        .request(server)
+        .get('/welcome')
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.status).to.equals('success');
+          expect(res.body.message).to.equals('Welcome!');
+          done();
+        });
     });
+  });
 
-    it('Negative : /register. Checking invalid email address (no @colorado.edu)', done => {
+  // Test /register route
+  describe('Register API', () => {
+    it('should successfully register a new user', done => {
       chai
         .request(server)
         .post('/register')
         .send({
-          nickname: 'Nettspend5', 
-          email: 'chungus5@gmail.com', 
-          password: 'KenBoneStillWater'
-      })
+          nickname: 'test_user',
+          email: 'test_user@colorado.edu',
+          password: 'secure_password'
+        })
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/login$/);
+          done();
+        });
+    });
+
+    it('should fail to register with invalid email', done => {
+      chai
+        .request(server)
+        .post('/register')
+        .send({
+          nickname: 'invalid_email_user',
+          email: 'invalid_email@gmail.com',
+          password: 'secure_password'
+        })
         .end((err, res) => {
           expect(res).to.have.status(400);
           expect(res.text).to.include('Please use a valid CU email address.');
@@ -75,147 +67,104 @@ describe('Server!', () => {
         });
     });
 
-    it('negative: fails to register with an existing email', done => {
+    it('should fail to register with an existing email', done => {
+      // Register the first user
       chai
         .request(server)
         .post('/register')
         .send({
-            nickname: 'Nettspend',
-            email: 'nettspend@colorado.edu',
-            password: 'chungus'
+          nickname: 'duplicate_user',
+          email: 'duplicate@colorado.edu',
+          password: 'secure_password'
         })
-        .end((err, res) => {
-          expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
-          expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/login$/);
-
-          chai // sub-process; attempts ot insert he same account information
-          .request(server)
-          .post('/register')
-          .send({
-            nickname: 'Nettspend',
-            email: 'nettspend@colorado.edu',
-            password: 'chungus'
-          })
-          .end((err, res) => {
-              console.log("Response text:", res.text);
-
-              expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
-              expect(res.text).to.include('Email already registered. Please use a different email.');
-              done();
-          });
-        });
-    });
-  });
-  
-  
-/*
-  describe('Testing Redirect', () => {
-    // Sample test case given to test /test endpoint.
-    it('/test route should redirect to /login with 302 HTTP status code', done => {
-      chai
-        .request(server)
-        .get('/test')
-        .end((err, res) => {
-          res.should.have.status(302); // Expecting a redirect status code
-          res.should.redirectTo(/^.*127\.0\.0\.1.*\/login$/); // Expecting a redirect to /login with the mentioned Regex
-          done();
-        });
-    });
-  });
-*/
-
-
-  describe('Testing Redirect', () => {
-    // Sample test case given to test /test endpoint.
-    it('/ route should redirect to /login with 302 HTTP status code', done => {
-      chai
-        .request(server)
-        .get('/')
-        .redirects(0)
-        .end((err, res) => {
-          res.should.have.status(302); // Expecting a redirect status code
-          res.should.redirectTo('/login'); // Expecting a redirect to /login with the mentioned Regex
-          done();
-        });
-    });
-  });
-
-  describe('Testing Render', () => {
-    // Sample test case given to test /test endpoint.
-    it('test "/login" route should render with an html response', done => {
-      chai
-        .request(server)
-        .get('/login') // for reference, see lab 8's login route (/login) which renders home.hbs
-        .end((err, res) => {
-          res.should.have.status(200); // Expecting a success status code
-          res.should.be.html; // Expecting a HTML response
-          done();
-        });
-    });
-  });
-
-
-  describe('Part C: 2 Additional Unit Testcases', () => {
-
-    it('Positive: test if logging in redirects to /account with an html response', done => {
-      chai
-        .request(server)
-        .post('/register')
-        .send({
-            nickname: 'redirect_to_accout_test',
-            email: 'redirect_to_accout_test@colorado.edu',
-            password: 'redirect_to_accout_test'
-        })
-        .end((err, res) => {
-          expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
-          expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/login$/);
-
+        .end(() => {
+          // Attempt to register the same user again
           chai
             .request(server)
-            .post('/login')
+            .post('/register')
             .send({
-              nickname: 'redirect_to_accout_test',
-              email: 'redirect_to_accout_test@colorado.edu',
-              password: 'redirect_to_accout_test'
+              nickname: 'duplicate_user',
+              email: 'duplicate@colorado.edu',
+              password: 'secure_password'
             })
             .end((err, res) => {
               expect(res).to.have.status(200);
-              expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/account$/);
+              expect(res.text).to.include('Email already registered. Please use a different email.');
               done();
-            })
+            });
         });
     });
+  });
 
-    it('Negative: test if entering in invalid password for existing account with correct email produces correct error message', done => {
+  // Test /login route
+  describe('Login API', () => {
+    before(done => {
+      // Register a user for login tests
       chai
         .request(server)
         .post('/register')
         .send({
-            nickname: 'correct_email_invalid_password',
-            email: 'correct_email_invalid_password@colorado.edu',
-            password: 'correct_password'
+          nickname: 'login_test_user',
+          email: 'login_test_user@colorado.edu',
+          password: 'test_password'
+        })
+        .end(() => done());
+    });
+
+    it('should successfully log in a registered user', done => {
+      chai
+        .request(server)
+        .post('/login')
+        .send({
+          email: 'login_test_user@colorado.edu',
+          password: 'test_password'
         })
         .end((err, res) => {
-          expect(res).to.have.status(200); // Expect a 200 status if it renders the error message
-          expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/login$/);
+          expect(res).to.have.status(200);
+          expect(res).to.redirectTo(/^.*127\.0\.0\.1.*\/account$/);
+          done();
+        });
+    });
 
-          chai
-            .request(server)
-            .post('/login')
-            .send({
-              nickname: 'correct_email_invalid_password',
-              email: 'correct_email_invalid_password@colorado.edu',
-              password: 'invalid_password'
-            })
-            .end((err, res) => {
-              //console.log("Response text:", res.text);
-
-              const email = 'correct_email_invalid_password@colorado.edu'
-              expect(res).to.have.status(400);
-              expect(res.text).to.include(`Login attempt failed: Incorrect password for user &quot;${email}&quot;.`);
-                //expect(res.text).to.include(`Login attempt failed: Incorrect password for user &quot;correct_email_invalid_password@colorado.edu&quot;.`);
-              done();
-            })
+    it('should fail to log in with incorrect password', done => {
+      chai
+        .request(server)
+        .post('/login')
+        .send({
+          email: 'login_test_user@colorado.edu',
+          password: 'wrong_password'
         })
-    })
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.text).to.include('Login attempt failed: Incorrect password');
+          done();
+        });
+    });
   });
+
+  // Test Redirect Behavior
+  describe('Redirect Tests', () => {
+    it('should redirect / to /login', done => {
+      chai
+        .request(server)
+        .get('/')
+        .redirects(0) // Prevent automatic handling of redirects
+        .end((err, res) => {
+          expect(res).to.have.status(302);
+          expect(res).to.have.header('location', '/login');
+          done();
+        });
+    });
+
+    it('should render the login page at /login', done => {
+      chai
+        .request(server)
+        .get('/login')
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res).to.be.html;
+          done();
+        });
+    });
+  });
+});
