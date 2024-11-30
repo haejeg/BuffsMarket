@@ -19,7 +19,7 @@ services:
     environment:
       - NODE_ENV=development
     depends_on:
-      - db
+      - process.env.PG_URI
     ports:
       - '3000:3000'
     volumes:
