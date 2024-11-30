@@ -128,43 +128,67 @@ app.post('/account/update-nickname', auth, async (req, res) => {
 });
 
 // Update Email
-app.post('/account/update-email', auth, async (req, res) => {
-  //i dont think we need this but i added it anyways?
-  const { email } = req.body;
-  const userId = req.session.user.id;
-  try {
-    if (!email.endsWith('@colorado.edu')) {
-      return res.status(400).render('pages/account', { user: req.session.user, message: 'Please use a valid CU email address.', error: true });
-    }
-    const query = 'UPDATE users SET email = $1 WHERE id = $2';
-    await db.none(query, [email, userId]);
-    req.session.user.email = email; // Update session data
-    res.redirect('/account');
-  } catch (err) {
-    console.error('Error updating email:', err);
-    if (err.code === '23505') { // Handle unique constraint violation
-      res.render('pages/account', { user: req.session.user, message: 'Email already registered. Please use a different email.', error: true });
-    } else {
-      res.status(500).render('pages/account', { user: req.session.user, message: 'Error updating email', error: true });
-    }
-  }
-});
+// I don't think this is needed
+// app.post('/account/update-email', auth, async (req, res) => {
+//   //i dont think we need this but i added it anyways?
+//   const { email } = req.body;
+//   const userId = req.session.user.id;
+//   try {
+//     if (!email.endsWith('@colorado.edu')) {
+//       return res.status(400).render('pages/account', { user: req.session.user, message: 'Please use a valid CU email address.', error: true });
+//     }
+//     const query = 'UPDATE users SET email = $1 WHERE id = $2';
+//     await db.none(query, [email, userId]);
+//     req.session.user.email = email; // Update session data
+//     res.redirect('/account');
+//   } catch (err) {
+//     console.error('Error updating email:', err);
+//     if (err.code === '23505') { // Handle unique constraint violation
+//       res.render('pages/account', { user: req.session.user, message: 'Email already registered. Please use a different email.', error: true });
+//     } else {
+//       res.status(500).render('pages/account', { user: req.session.user, message: 'Error updating email', error: true });
+//     }
+//   }
+// });
 
 // Update Password
+// Update Password
 app.post('/account/update-password', auth, async (req, res) => {
-  // we need to make it so that password has a verification for old password
-  const { password } = req.body;
+  const { oldPassword, newPassword } = req.body;
   const userId = req.session.user.id;
+
   try {
-    const hashedPassword = await bcrypt.hash(password, 10); // Hash new password
-    const query = 'UPDATE users SET password = $1 WHERE id = $2';
-    await db.none(query, [hashedPassword, userId]);
+    // Get the current hashed password from the database
+    const query = 'SELECT password FROM users WHERE id = $1';
+    const { password: currentHashedPassword } = await db.one(query, [userId]);
+
+    // Verify the old password
+    const isMatch = await bcrypt.compare(oldPassword, currentHashedPassword);
+    if (!isMatch) {
+      return res.status(400).render('pages/account', {
+        user: req.session.user,
+        message: 'Old password is incorrect',
+        error: true,
+      });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the password in the database
+    const updateQuery = 'UPDATE users SET password = $1 WHERE id = $2';
+    await db.none(updateQuery, [hashedPassword, userId]);
+
     res.redirect('/account');
   } catch (err) {
     console.error('Error updating password:', err);
-    res.status(500).render('pages/account', { user: req.session.user, message: 'Error updating password', error: true });
+    res.status(500).render('pages/account', {
+      user: req.session.user,
+      message: 'Error updating password',
+      error: true,
+    });
   }
-});
+}); 
 
 
 // Import the Google Cloud client library

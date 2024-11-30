@@ -21,53 +21,60 @@
       -webkit-background-clip: text;
       padding-bottom: 2px;
     }
-    .form-inline {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .form-inline label {
-      width: 100px; /* Align labels */
-      text-align: right; /* Right-align text */
-    }
-    .form-inline input {
-      flex-grow: 1; /* Ensure input boxes fill the space */
-    }
     .container {
       max-width: 600px;
-      {{!-- margin: /* Center the container */ --}}
+      margin: 0 auto; /* Center the container */
+      padding: 20px;
+    }
+    .alert {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body data-bs-theme="dark" class="d-flex flex-column min-vh-100">
   <div class="container d-flex flex-column align-items-center" style="padding-top: 50px;">
     <h1 class="mb-4 custom-title">Edit Your Account</h1>
+    
+    <!-- Error Message -->
     {{> message }}
 
     <!-- Nickname Form -->
     <form method="POST" action="/account/update-nickname" class="w-100 mb-4">
-      <div class="form-inline">
+      <div class="form-group">
         <label for="nickname" class="form-label">Nickname</label>
         <input type="text" class="form-control" id="nickname" name="nickname" value="{{user.nickname}}" required>
-        <button type="submit" class="btn custom-btn">Update</button>
-      </div>
-    </form>
-
-    <!-- Email Form -->
-    <form method="POST" action="/account/update-email" class="w-100 mb-4">
-      <div class="form-inline">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" required>
-        <button type="submit" class="btn custom-btn">Update</button>
+        <button type="submit" class="btn custom-btn mt-2">Update</button>
       </div>
     </form>
 
     <!-- Password Form -->
     <form method="POST" action="/account/update-password" class="w-100 mb-4">
-      <div class="form-inline">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password" required>
-        <button type="submit" class="btn custom-btn">Update</button>
+      <div class="form-group">
+        <label for="oldPassword" class="form-label">Old Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="oldPassword"
+          name="oldPassword"
+          placeholder="Enter old password"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="newPassword" class="form-label">New Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="newPassword"
+          name="newPassword"
+          placeholder="Enter new password"
+          required
+        />
+        <button type="submit" class="btn custom-btn mt-2">Update</button>
       </div>
     </form>
   </div>
