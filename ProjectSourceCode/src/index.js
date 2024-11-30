@@ -127,31 +127,6 @@ app.post('/account/update-nickname', auth, async (req, res) => {
   }
 });
 
-// Update Email
-// I don't think this is needed
-// app.post('/account/update-email', auth, async (req, res) => {
-//   //i dont think we need this but i added it anyways?
-//   const { email } = req.body;
-//   const userId = req.session.user.id;
-//   try {
-//     if (!email.endsWith('@colorado.edu')) {
-//       return res.status(400).render('pages/account', { user: req.session.user, message: 'Please use a valid CU email address.', error: true });
-//     }
-//     const query = 'UPDATE users SET email = $1 WHERE id = $2';
-//     await db.none(query, [email, userId]);
-//     req.session.user.email = email; // Update session data
-//     res.redirect('/account');
-//   } catch (err) {
-//     console.error('Error updating email:', err);
-//     if (err.code === '23505') { // Handle unique constraint violation
-//       res.render('pages/account', { user: req.session.user, message: 'Email already registered. Please use a different email.', error: true });
-//     } else {
-//       res.status(500).render('pages/account', { user: req.session.user, message: 'Error updating email', error: true });
-//     }
-//   }
-// });
-
-// Update Password
 // Update Password
 app.post('/account/update-password', auth, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
