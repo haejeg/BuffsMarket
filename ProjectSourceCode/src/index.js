@@ -125,18 +125,19 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
   }
 });
 
-// GET /chat - Fetch and display received messages
-app.get('/chat', async (req, res) => {
+app.get('/messages', async (req, res) => {
   const userId = req.session.user ? req.session.user.id : null;
 
   if (!userId) {
-    return res.redirect('/login'); // Redirect to login if the user is not authenticated
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
-    // Fetch received messages for the logged-in user
     const receivedMessages = await db.any(
-      `SELECT messages.content, messages.timestamp, users.nickname AS senderNickname
+      `SELECT 
+        messages.content, 
+        TO_CHAR(messages.timestamp, 'FMMonth DD, YYYY HH12:MI AM') AS timestamp, 
+        users.nickname AS senderNickname
        FROM messages
        JOIN users ON messages.senderID = users.id
        WHERE messages.receiverID = $1
@@ -144,25 +145,14 @@ app.get('/chat', async (req, res) => {
       [userId]
     );
 
-    // Log received messages for debugging
-    console.log(receivedMessages);
-
-    // Render the message page and pass the received messages
-    res.render('pages/chat', {
-      receivedMessages,
-      message: req.session.message || null, // Display any message (e.g., success/error)
-    });
-
-    req.session.message = null;
-
+    res.json(receivedMessages);
   } catch (error) {
-    console.error('Error fetching messages:', error);
-    res.render('pages/chat', {
-      message: 'Error fetching messages. Please try again later.',
-      error: true
-    });
+    console.error('Error fetching messages:', error.message);
+    res.status(500).json({ error: 'Error fetching messages' });
   }
 });
+
+
 
 // POST /chat - Send a message
 app.post('/chat', async (req, res) => {
@@ -185,7 +175,7 @@ app.post('/chat', async (req, res) => {
 
     // Redirect to the message page or display a success message
     res.render('pages/chat', {
-      message: 'Message sent successfully!',
+      message: [senderID, receiverID, content, timestamp],
       receivedMessages: [], // Optionally fetch the latest messages after sending
     });
 

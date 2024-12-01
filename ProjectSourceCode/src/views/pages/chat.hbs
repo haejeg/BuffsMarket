@@ -16,45 +16,69 @@
     <h2>Send a Message</h2>
     <form action="/chat" method="POST">
       <label for="receiverID">Receiver ID:</label>
-      <input type="id" id="receiverID" name="receiverID" required>
+      <input type="text" id="receiverID" name="receiverID" required maxlength="10" pattern="\d+">
 
       <label for="content">Message:</label>
-      <textarea id="content" name="content" required></textarea>
+      <textarea id="content" name="content" required maxlength="500"></textarea>
 
       <button type="submit">Send</button>
     </form>
 
-    {{#if message}}
-      <div class="message {{#if error}}error{{/if}}">
-        {{message}}
-      </div>
-    {{/if}}
+    <p id="loadingMessage" style="color: gray;"></p>
+    <p id="errorMessage" style="color: red;"></p>
   </section>
 
   <!-- Received Messages -->
   <section>
     <h2>Your Messages</h2>
-
-    {{#if receivedMessages}}
-      {{#if receivedMessages.length}}
-        <ul>
-          {{#each receivedMessages}}
-            <li>
-              <strong>{{this.senderNickname}}</strong> ({{this.timestamp}}):
-              <p>{{this.content}}</p>
-            </li>
-          {{/each}}
-        </ul>
-      {{else}}
-        <p>You have no messages yet.</p>
-      {{/if}}
-    {{else}}
-      <p>Error fetching messages.</p>
-    {{/if}}
+    <ul id="messagesList">
+      <!-- Messages will be dynamically populated here -->
+    </ul>
   </section>
 
-  <footer>
-    <p>&copy; 2024 Your Application</p>
-  </footer>
+
+  <script>
+    async function fetchMessages() {
+      const loadingMessage = document.getElementById('loadingMessage');
+      try {
+        loadingMessage.textContent = 'Loading messages...';
+
+        const response = await fetch('/messages');
+        if (!response.ok) {
+          throw new Error('Failed to fetch messages');
+        }
+        const messages = await response.json();
+
+        // Hide the loading message
+        loadingMessage.textContent = '';
+
+        // Clear the existing messages
+        const messagesList = document.getElementById('messagesList');
+        messagesList.innerHTML = '';
+
+        // Render the fetched messages
+        if (messages.length === 0) {
+          messagesList.innerHTML = '<p>No messages yet.</p>';
+        } else {
+          messages.forEach((message) => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+              <strong>${message.senderNickname}</strong> (${message.timestamp}):
+              <p>${message.content}</p>
+            `;
+            messagesList.appendChild(listItem);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = 'Error fetching messages. Please try again.';
+      }
+    }
+
+    // Call fetchMessages on page load
+    document.addEventListener('DOMContentLoaded', fetchMessages);
+  </script>
 </body>
 </html>
+
