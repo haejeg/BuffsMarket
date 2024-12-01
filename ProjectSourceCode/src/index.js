@@ -477,7 +477,33 @@ app.get('/logout', (req, res) => {
   });
 });
 
+app.get('/search', async (req, res) => {
+  try {
+    const name = req.query.query;
+    if (!name) {
+      return res.status(400).send("Search term is required.");
+    }
+    const query = `
+      SELECT 
+        listings.id AS listing_id, 
+        listings.title, 
+        listings.price, 
+        TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date, 
+        listing_images.image_url
+      FROM listings
+      LEFT JOIN listing_images 
+        ON listings.id = listing_images.listing_id
+        AND listing_images.is_main = TRUE
+      WHERE LOWER(listings.title) LIKE $1`;
+    const listings = await db.any(query, [`%${name.toLowerCase()}%`]);
+    //console.log('Listings data:', listings);
+    res.render('pages/home', { listings , user: req.session.user});
+  } catch (error) {
+    console.error('Error fetching listings with prompt:', error);
+    res.status(500).send('Server Error');
+  }
 
+});
 
 // Authentication Middleware
 function auth(req, res, next) {
