@@ -49,7 +49,10 @@
             <a class="nav-link transition" href="/home">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link transition" href="/chat">Messages</a>
+            <a class="nav-link transition" href="/messages">Messages</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link transition" href="/mylistings">My Listings</a>
           </li>
         </ul>
         {{#if user.nickname}}
@@ -68,8 +71,7 @@
         </button>
         </div>
         <div>
-          <!-- Change ID back to username -->
-          <a href="/account" class="nav-link text-dark text-spacing"> {{user.id}} </a> 
+          <a href="/account" class="nav-link text-dark text-spacing"> {{user.nickname}} </a> 
         </div>
         {{/if}}
       </div>

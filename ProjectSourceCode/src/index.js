@@ -34,7 +34,13 @@ const hbs = handlebars.create({
   partialsDir: path.join(__dirname, 'views/partials'),
 });
 
-
+// Authentication Middleware
+function auth(req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+  next();
+}
 
 const { Pool } = require('pg');
 const pool = new Pool({
@@ -105,7 +111,7 @@ app.get('/chat', (req, res) => {
   res.render('pages/chat');
 });
 
-app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only logged in users can access certain pages
+app.get('/home', auth, async (req, res) => {
   try {
     const query = 
     `SELECT 
@@ -119,8 +125,7 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
     ON listings.id = listing_images.listing_id
     AND listing_images.is_main = TRUE`;
     const listings = await db.query(query);
-    //console.log('Listings data:', listings);
-    res.render('pages/home', { listings , user: req.session.user});
+    res.render('pages/home', { listings , user: req.session.user });
   } catch (error) {
     console.error('Error fetching listings:', error);
     res.status(500).send('Server Error');
@@ -157,31 +162,33 @@ app.get('/messages', async (req, res) => {
 // POST /chat - Send a message
 app.post('/chat', async (req, res) => {
   const { receiverID, content } = req.body;
-  const senderID = req.session.user.id; // Assuming the sender's ID is in the session
+  const senderID =  req.session.user.id; // Assuming the sender's ID is in the session
+  const senderNickname = req.session.user.nickname; // Assuming the sender's nickname is in the session
 
   try {
     // Validate the receiver's ID
     const receiver = await db.oneOrNone('SELECT * FROM users WHERE id = $1', [receiverID]);
 
     if (!receiver) {
-      return res.status(400).render('pages/chat', { message: 'Receiver ID is not valid.', error: true });
+      return res.status(400).render('pages/chat', { message: 'Receiver ID is not valid.', error: true, user: req.session.user, });
     }
 
     const timestamp = new Date().toISOString(); // Use current timestamp
 
     // Insert the message into the messages table
-    await db.none('INSERT INTO messages (senderID, receiverID, content, timestamp) VALUES ($1, $2, $3, $4)',
-      [senderID, receiverID, content, timestamp]);
+    await db.none('INSERT INTO messages (senderID, senderNickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
+      [senderID, senderNickname, receiverID, content, timestamp]);
 
     // Redirect to the message page or display a success message
     res.render('pages/chat', {
-      message: [senderID, receiverID, content, timestamp],
+      user: req.session.user,
+      message: [senderID, senderNickname, receiverID, content, timestamp],
       receivedMessages: [], // Optionally fetch the latest messages after sending
     });
 
   } catch (error) {
     console.error('Error sending message:', error);
-    res.status(500).render('pages/chat', { message: 'Error sending message. Please try again later.', error: true });
+    res.status(500).render('pages/chat', { message: 'Error sending message. Please try again later.', error: true, user: req.session.user, });
   }
 });
 
@@ -263,6 +270,31 @@ app.post('/account/update-password', auth, async (req, res) => {
     });
   }
 }); 
+
+app.get('/mylistings', auth, async (req, res) => { // Add 'auth' later to ensure that only logged in users can access certain pages
+  try {
+    const user_id = req.session.user.id;
+    const query = 
+    `SELECT 
+      listings.id AS listing_id, 
+      listings.title, 
+      listings.price, 
+      TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date, 
+      listing_images.image_url
+    FROM listings
+    LEFT JOIN listing_images 
+    ON listings.id = listing_images.listing_id
+    AND listing_images.is_main = TRUE
+    WHERE listings.user_id = $1`;
+    const listings = await db.query(query, [user_id]);
+    console.log('Listings data:', listings);
+    res.render('pages/mylistings', { listings , user: req.session.user});
+  } catch (error) {
+    console.error('Error fetching listings:', error);
+    res.status(500).send('Server Error');
+  }
+});
+
 
 
 // Import the Google Cloud client library
@@ -604,13 +636,6 @@ app.get('/search', async (req, res) => {
 
 
 
-// Authentication Middleware
-function auth(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
-  next();
-}
 
 // *****************************************************
 // <!-- Section 5 : Start Server -->
