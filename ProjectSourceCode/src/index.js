@@ -27,16 +27,21 @@ const hbs = handlebars.create({
   partialsDir: path.join(__dirname, 'views/partials'),
 });
 
+
+
 const dbConfig = {
-  host: process.env.POSTGRES_HOST,
+  host: process.env.POSTGRES_HOST || 'localhost',
   port: 5432,
   database: process.env.POSTGRES_DB,
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
 };
 
+
+
 const db = pgp(dbConfig);
 
+console.log('Database Configuration:', dbConfig);
 db.connect()
   .then((obj) => {
     console.log('Database connection successful');
