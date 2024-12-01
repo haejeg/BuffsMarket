@@ -420,7 +420,7 @@ app.post('/login', async (req, res) => {
           console.error('Error saving session:', err);
           return res.render('pages/login', { message: 'An unexpected error occurred. Please try again later.', error:true });
         }
-        res.redirect('/account');
+        res.redirect('/home');
       }); 
     } else {
       // Incorrect password, render login with an error message
