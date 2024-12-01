@@ -20,6 +20,12 @@ const upload = multer({ dest: 'uploads/' }); // Files will be temporarily saved 
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
 
+const db = pgp({
+  connectionString: process.env.DATABASE_URL, // Render automatically injects this environment variable
+  ssl: {
+      rejectUnauthorized: false, // Required for secure connections in Render
+  },
+});
 
 const hbs = handlebars.create({
   extname: 'hbs',
