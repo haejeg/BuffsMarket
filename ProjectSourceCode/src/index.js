@@ -19,8 +19,6 @@ const upload = multer({ dest: 'uploads/' }); // Files will be temporarily saved 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
-
-
 const db = pgp({
   connectionString: process.env.DATABASE_URL, // Render automatically injects this environment variable
   ssl: {
@@ -160,48 +158,27 @@ app.get('/messages', async (req, res) => {
 });
 
 // POST /chat - Send a message
-/*
-const receivedMessages = await db.any(
-      `SELECT 
-        messages.content, 
-        TO_CHAR(messages.timestamp, 'FMMonth DD, YYYY HH12:MI AM') AS timestamp, 
-        users.nickname AS sendernickname
-       FROM messages
-       JOIN users ON messages.senderID = users.id
-       WHERE messages.receiverID = $1
-       ORDER BY messages.timestamp DESC`,
-      [userId]
-    );    
-*/
 app.post('/chat', async (req, res) => {
   const { receiverID, content } = req.body;
-  const senderID =  req.session.user.id; // Assuming the sender's ID is in the session
-  const sendernickname = req.session.user.nickname; // Assuming the sender's nickname is in the session
-
+  const senderID = req.session.user.id; // Assuming the sender's ID is in the session
   try {
     // Validate the receiver's ID
     const receiver = await db.oneOrNone('SELECT * FROM users WHERE id = $1', [receiverID]);
-
     if (!receiver) {
-      return res.status(400).render('pages/chat', { message: 'Receiver ID is not valid.', error: true, user: req.session.user, });
+      return res.status(400).render('pages/chat', { message: 'Receiver ID is not valid.', error: true });
     }
-
     const timestamp = new Date().toISOString(); // Use current timestamp
-
     // Insert the message into the messages table
     await db.none('INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
-      [senderID, sendernickname, receiverID, content, timestamp]);
-
+      [senderID, receiverID, content, timestamp]);
     // Redirect to the message page or display a success message
     res.render('pages/chat', {
-      user: req.session.user,
       message: [senderID, sendernickname, receiverID, content, timestamp],
       receivedMessages: [], // Optionally fetch the latest messages after sending
     });
-
   } catch (error) {
     console.error('Error sending message:', error);
-    res.status(500).render('pages/chat', { message: 'Error sending message. Please try again later.', error: true, user: req.session.user, });
+    res.status(500).render('pages/chat', { message: 'Error sending message. Please try again later.', error: true });
   }
 });
 
@@ -221,31 +198,6 @@ app.post('/account/update-nickname', auth, async (req, res) => {
   }
 });
 
-// Update Email
-// I don't think this is needed
-// app.post('/account/update-email', auth, async (req, res) => {
-//   //i dont think we need this but i added it anyways?
-//   const { email } = req.body;
-//   const userId = req.session.user.id;
-//   try {
-//     if (!email.endsWith('@colorado.edu')) {
-//       return res.status(400).render('pages/account', { user: req.session.user, message: 'Please use a valid CU email address.', error: true });
-//     }
-//     const query = 'UPDATE users SET email = $1 WHERE id = $2';
-//     await db.none(query, [email, userId]);
-//     req.session.user.email = email; // Update session data
-//     res.redirect('/account');
-//   } catch (err) {
-//     console.error('Error updating email:', err);
-//     if (err.code === '23505') { // Handle unique constraint violation
-//       res.render('pages/account', { user: req.session.user, message: 'Email already registered. Please use a different email.', error: true });
-//     } else {
-//       res.status(500).render('pages/account', { user: req.session.user, message: 'Error updating email', error: true });
-//     }
-//   }
-// });
-
-// Update Password
 // Update Password
 app.post('/account/update-password', auth, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
@@ -318,29 +270,6 @@ const storage = new Storage({
   keyFilename: '/etc/secrets/melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
-
-// // Route to handle file uploads (NOT USED ANYMORE!!)
-// app.post('/uploadImage', upload.single('image'), async (req, res) => {
-//   const filePath = req.file.path; // The temporary file path created by multer
-//   const originalFileName = req.file.originalname;
-//   const destination = originalFileName; // You can modify this if you want to rename it on GCS
-
-//   try {
-//     // Upload the file to Google Cloud Storage
-//     await storage.bucket(bucketName).upload(filePath, {
-//       destination: destination,
-//     });
-//     res.send(`${originalFileName} uploaded to ${bucketName}/${destination}`);
-//     imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
-    
-// // Save this imageUrl along with other listing data in your database
-
-//   } catch (error) {
-//     console.error('Error uploading the file:', error);
-//     res.status(500).send('Failed to upload image');
-//   }
-// });
-
 app.get('/listing', async (req, res) => {
   try {
     const listing_id = req.query.id;
@@ -374,11 +303,6 @@ app.get('/listing', async (req, res) => {
   }
 });
 
-// app.get('/home', (req, res) => {
-//   res.render('pages/home', {});
-// });
-
-
 app.get('/account', (req, res) => {
   res.render('pages/account', {user: req.session.user});
 });
@@ -393,8 +317,6 @@ app.post('/register', async (req, res) => {
     if (!email.endsWith('@colorado.edu')) {
       return res.status(400).render('pages/register', { message: 'Please use a valid CU email address.', error: true });
     }
-    // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
-    // - Danny
     const query = 'INSERT INTO users (email, password, nickname) VALUES ($1, $2, $3)';
 
     await db.none(query, [email, hashedPassword, nickname]); 
@@ -484,45 +406,15 @@ app.post('/logout', (req, res) => {
   });
 });
 
-/*
-app.post('/register', async (req, res) => {
-  
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const { nickname } = req.body;
-    const { email } = req.body;
-    if (!email.endsWith('@colorado.edu')) {
-      return res.status(400).render('pages/register', { message: 'Please use a valid CU email address.', error: true });
-    }
-    // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
-    // - Danny
-    const query = 'INSERT INTO users (email, password, nickname) VALUES ($1, $2, $3)';
-
-    await db.none(query, [email, hashedPassword, nickname]); 
-    res.redirect('/login');
-  } catch (err) {
-    console.error(err);
-    if (err.code === '23505') { // PostgreSQL unique violation error code
-      res.render('pages/register', { message: 'Email already registered. Please use a different email.', error: true });
-    } else {
-      res.status(500).send('Error registering user');
-    }
-  }
-});
-*/
-
 // Handle login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body; 
-  // change this from username -> email, reason? idk but it's the variable used within "form" in html, so that's what it probably correlates to
-  // - Danny
   try {
     const query = 'SELECT * FROM users WHERE email = $1';
     const user = await db.oneOrNone(query, [email]); 
 
     if (!user) {
       console.log(`Login attempt failed: Email: "${email}" not found.`);
-      //return res.redirect('/register');
       return res.status(400).render('pages/login', { message: `Login attempt failed: Email: "${email}" not found.`, error:true });
     }
 
@@ -546,43 +438,6 @@ app.post('/login', async (req, res) => {
     res.status(500).render('pages/login', { message: 'An unexpected error occurred. Please try again later.', error:true });
   }
 });
-
-// DUMMY API LAB 11
-app.get('/welcome', (req, res) => {
-  res.json({status: 'success', message: 'Welcome!'});
-});
-
-
-
-/*
-app.get('/home', auth, async (req, res) => {
-  try {
-    const keyword = 'music'; // Example keyword; change as needed
-    const size = 10; // Number of events to fetch
-    const apiKey = process.env.API_KEY; // Get API key directly from environment variables
-    res.render('pages/discover', { user: req.session.user }); //USE THIS IN HOME PAGE SO SEARCH BAR SHOWS UP
-    const response = await axios({
-      url: `https://app.ticketmaster.com/discovery/v2/events.json`,
-      method: 'GET',
-      headers: {
-        'Accept-Encoding': 'application/json',
-      },
-      params: {
-        apikey: apiKey,
-        keyword: keyword,
-        size: size,
-      },
-    });
-
-    const events = response.data._embedded ? response.data._embedded.events : [];
-    res.render('pages/discover', { results: events });
-  } catch (error) {
-    console.error('Error fetching events:', error.message);
-    res.render('pages/discover', { results: [], message: 'Failed to fetch events. Please try again later.', error:true });
-  }
-});
-*/
-
 
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => {
@@ -654,9 +509,4 @@ app.get('/search', async (req, res) => {
 // <!-- Section 5 : Start Server -->
 // *****************************************************
 
-// app.listen(3000, () => {
-//   console.log('Server is listening on port 3000');
-// });
-
-//app.listen(3000);
 module.exports = app.listen(3000);
