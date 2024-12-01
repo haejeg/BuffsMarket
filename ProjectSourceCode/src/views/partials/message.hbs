@@ -1,5 +1,90 @@
-{{#if message}}
-  <div class="alert alert-{{#if error}}danger{{else}}success{{/if}}" role="alert">
-    {{ message }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Message</title>
+  <link rel="stylesheet" href="/styles.css"> <!-- Optional: Link to external CSS file for styling -->
+</head>
+
+<body>
+  <div class="container">
+    <h1>Send a Message</h1>
+
+    <!-- Message form -->
+    <form method="POST" action="/send-message">
+      <div class="form-group">
+        <label for="receiverEmail">Receiver's Email:</label>
+        <input type="email" id="receiverEmail" name="receiverEmail" placeholder="Enter receiver's email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="content">Message:</label>
+        <textarea id="content" name="content" placeholder="Enter your message" required></textarea>
+      </div>
+
+      <button type="submit">Send Message</button>
+    </form>
+
+    <!-- Error or success message display (optional) -->
+    <div id="message-status"></div>
+
+    <!-- Section to display messages sent by the user -->
+    <h2>Your Sent Messages</h2>
+    <div id="sent-messages">
+      <!-- Messages will be dynamically loaded here -->
+      <p>No messages sent yet.</p>
+    </div>
   </div>
-{{/if}}
+
+  <script>
+    // Check for a status message in the URL query parameters (for example after a successful or failed submission)
+    const messageStatus = new URLSearchParams(window.location.search).get('status');
+
+    if (messageStatus) {
+      const statusDiv = document.getElementById('message-status');
+      if (messageStatus === 'success') {
+        statusDiv.textContent = 'Message sent successfully!';
+        statusDiv.style.color = 'green';
+      } else if (messageStatus === 'error') {
+        statusDiv.textContent = 'There was an error sending your message.';
+        statusDiv.style.color = 'red';
+      }
+    }
+
+    // Function to fetch and display sent messages
+    async function loadSentMessages() {
+      try {
+        const response = await fetch('/sent-messages'); // Assuming you have a route to fetch the sent messages
+        const data = await response.json();
+
+        const sentMessagesContainer = document.getElementById('sent-messages');
+        if (data.messages && data.messages.length > 0) {
+          sentMessagesContainer.innerHTML = ''; // Clear "No messages sent yet" message
+
+          data.messages.forEach(message => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.innerHTML = `
+              <strong>To:</strong> ${message.receiverEmail}<br>
+              <strong>Message:</strong> ${message.content}<br>
+              <strong>Sent on:</strong> ${new Date(message.timestamp).toLocaleString()}<br>
+              <hr>
+            `;
+            sentMessagesContainer.appendChild(messageDiv);
+          });
+        } else {
+          sentMessagesContainer.innerHTML = '<p>No messages sent yet.</p>';
+        }
+      } catch (error) {
+        console.error('Error loading sent messages:', error);
+      }
+    }
+
+    // Load the sent messages when the page is ready
+    loadSentMessages();
+  </script>
+</body>
+
+</html>

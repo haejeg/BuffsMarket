@@ -18,6 +18,14 @@ CREATE TABLE IF NOT EXISTS listings (
     status VARCHAR(50) NOT NULL -- we need good naming conventions for status - d
 );
 
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  senderID INT NOT NULL,
+  receiverID INT NOT NULL,
+  content TEXT NOT NULL,
+  timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS listing_images (
     id SERIAL PRIMARY KEY,
     listing_id INT REFERENCES listings(id) ON DELETE CASCADE,
