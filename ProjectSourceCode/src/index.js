@@ -177,8 +177,8 @@ app.post('/chat', async (req, res) => {
 
     // Insert the message into the database
     await db.none(
-      'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
-      [senderID, senderNickname, receiverID, content, timestamp]
+      'INSERT INTO messages (senderID, receiverID, content, timestamp) VALUES ($1, $2, $3, $4)',
+      [senderID, receiverID, content, timestamp]
     );
 
     res.render('pages/chat', { message: 'Message sent successfully.', error: false });
