@@ -27,7 +27,7 @@ const hbs = handlebars.create({
   partialsDir: path.join(__dirname, 'views/partials'),
 });
 
-require('dotenv').config(); // Load environment variables
+
 
 const dbConfig = {
   host: process.env.POSTGRES_HOST, // Use the host from the .env file
