@@ -87,6 +87,7 @@
           throw new Error('Failed to fetch messages');
         }
         const messages = await response.json();
+        console.log(messages); // Debugging purposes, lets maybe remove this later.
 
         // Hide the loading message
         loadingMessage.textContent = '';
