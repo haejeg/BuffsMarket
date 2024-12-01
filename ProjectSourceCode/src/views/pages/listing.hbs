@@ -186,16 +186,44 @@
         </div>
 
         <div class="listing-details">
-            <h2 class="listing-title">{{listing.title}}</h2>
-            <p class="listing-price">${{listing.price}}</p>
-            <p class="listing-user">${{listing}}</p>
-            <p class="listing-description">{{listing.description}}</p>
-            <p class="listing-date">Listed on: {{listing.created_date}}</p>
-        </div>
+  <h2 class="listing-title">{{listing.title}}</h2>
+  <p class="listing-price">${{listing.price}}</p>
+  <p class="listing-description">{{listing.description}}</p>
+  <p class="listing-date">Listed on: {{listing.created_date}}</p>
+  
+  {{!-- Start Chat Button --}}
+  <button class="btn btn-primary mt-3" id="startChatButton" data-user-id="{{listing.user_id}}" data-user-nickname="{{listing.nickname}}">
+    Start Chat with {{listing.user_id}}
+  </button>
+</div>
+
 
     </div>
 
         <script>
+             document.getElementById('startChatButton').addEventListener('click', async function () {
+    const userId = this.dataset.userId;
+    const userNickname = this.dataset.userNickname;
+
+    try {
+      const response = await fetch('/start-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receiverID: userId }),
+      });
+
+      if (response.ok) {
+        // Redirect to the chat page after starting the chat
+        window.location.href = `/chat?receiverID=${userId}&nickname=${userNickname}`;
+      } else {
+        alert('Failed to start chat. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      alert('An error occurred while starting the chat.');
+    }
+  });
+
     let slideIndex = 1;
     showSlide(slideIndex);
 

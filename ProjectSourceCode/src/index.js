@@ -19,12 +19,6 @@ const upload = multer({ dest: 'uploads/' }); // Files will be temporarily saved 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
-const db = pgp({
-  connectionString: process.env.DATABASE_URL, // Render automatically injects this environment variable
-  ssl: {
-      rejectUnauthorized: false, // Required for secure connections in Render
-  },
-});
 
 const hbs = handlebars.create({
   extname: 'hbs',
@@ -32,13 +26,12 @@ const hbs = handlebars.create({
   partialsDir: path.join(__dirname, 'views/partials'),
 });
 
-// Authentication Middleware
-function auth(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
-  next();
-}
+const db = pgp({
+  connectionString: process.env.DATABASE_URL, // Render automatically injects this environment variable
+  ssl: {
+      rejectUnauthorized: false, // Required for secure connections in Render
+  },
+});
 
 const { Pool } = require('pg');
 const pool = new Pool({
@@ -47,7 +40,6 @@ const pool = new Pool({
       rejectUnauthorized: false, // Required for secure connections on Render
     },
   });
-
   // Test the connection
   pool.query('SELECT NOW()', (err, res) => {
     if (err) {
@@ -55,12 +47,19 @@ const pool = new Pool({
     } else {
       console.log('Database connected successfully:', res.rows[0]);
     }
-  });
 
 
 // *****************************************************
 // <!-- Section 3 : App Settings -->
 // *****************************************************
+
+// Authentication Middleware
+function auth(req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+  next();
+}
 
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
@@ -98,15 +97,16 @@ app.get('/register', (req, res) => {
   res.render('pages/register');
 });
 
-// Chat page route
-app.get('/chat', (req, res) => {
-  // If you have user authentication, you might want to check if the user is logged in
-  if (!req.session.user) {
-    // Redirect to login page if the user is not authenticated
-    return res.redirect('/login');
+app.get('/chat', auth, async (req, res) => {
+  const { receiverID, nickname } = req.query;
+
+  if (!receiverID || !nickname) {
+    // If no specific chat is selected, show the main chat page
+    return res.render('pages/chat', { user: req.session.user });
   }
 
-  res.render('pages/chat', {user: req.session.user,} );
+  // Pass the receiver's information to the chat page
+  res.render('pages/chat', { user: req.session.user, receiverID, nickname });
 });
 
 app.get('/home', auth, async (req, res) => {
@@ -155,15 +155,63 @@ app.get('/messages', auth, async (req, res) => {
 });
 
 app.get('/users', auth, async (req, res) => {
+  const userId = req.session.user.id;
+
   try {
-    const userId = req.session.user.id;
-    const users = await db.any('SELECT id, nickname FROM users WHERE id != $1', [userId]);
+    const users = await db.any(
+      `SELECT DISTINCT users.id, users.nickname
+       FROM users
+       JOIN messages ON 
+         (messages.senderID = users.id AND messages.receiverID = $1)
+         OR (messages.receiverID = users.id AND messages.senderID = $1)
+       WHERE users.id != $1`,
+      [userId]
+    );
     res.json(users);
   } catch (err) {
     console.error('Error fetching users:', err);
     res.status(500).json({ error: 'Error fetching users' });
   }
 });
+
+app.post('/start-chat', auth, async (req, res) => {
+  const userId = req.session.user.id; // Get sender ID from session
+  const senderNickname = req.session.user.nickname; // Get sender nickname from session
+  const { receiverID } = req.body;
+
+  try {
+    console.log("Starting chat with:", receiverID);
+
+    // Validate the receiver's ID
+    const receiver = await db.oneOrNone('SELECT id FROM users WHERE id = $1', [receiverID]);
+    if (!receiver) {
+      console.error(`Receiver with ID ${receiverID} not found.`);
+      return res.status(400).json({ error: 'Receiver not found' });
+    }
+
+    // Check if a chat already exists
+    const chatExists = await db.oneOrNone(
+      `SELECT 1 FROM messages 
+       WHERE (senderID = $1 AND receiverID = $2)
+          OR (senderID = $2 AND receiverID = $1)`,
+      [userId, receiverID]
+    );
+
+    if (!chatExists) {
+      // Insert a placeholder message with sendernickname
+      await db.none(
+        'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
+        [userId, senderNickname, receiverID, '[Chat started]', new Date().toISOString()]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error starting chat:', err);
+    res.status(500).json({ error: 'Error starting chat' });
+  }
+});
+
 
 
 app.post('/chat', async (req, res) => {
@@ -186,15 +234,17 @@ app.post('/chat', async (req, res) => {
 
     // Insert the message into the database
     await db.none(
-      'INSERT INTO messages (senderID, receiverID, content, timestamp) VALUES ($1, $2, $3, $4)',
-      [senderID, receiverID, content, timestamp]
+      'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
+      [senderID, senderNickname, receiverID, content, timestamp]
     );
+
     res.render('pages/chat', { message: 'Message sent successfully.', error: false });
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).render('pages/chat', { message: 'Error sending message. Please try again later.', error: true });
   }
 });
+
 
 // Update Nickname
 app.post('/account/update-nickname', auth, async (req, res) => {
@@ -286,35 +336,42 @@ const storage = new Storage({
 app.get('/listing', async (req, res) => {
   try {
     const listing_id = req.query.id;
-    console.log('Received listing ID:', listing_id); // Log the received ID
 
-    if(!listing_id){
-      return res.status(400).send('Listing ID not present.');
+    if (!listing_id) {
+      return res.status(400).send('Listing ID not provided.');
     }
 
-    const listing_query = `SELECT 
-      listings.id AS listing_id, 
-      listings.title, 
-      listings.price, 
-      listings.description, 
-      listings.created_at AS created_date 
-    FROM listings WHERE listings.id = $1
-    LIMIT 1`;
+    const listing_query = `
+      SELECT 
+        listings.id AS listing_id, 
+        listings.title, 
+        listings.price, 
+        listings.description, 
+        listings.created_at AS created_date,
+        users.id AS user_id,
+        users.nickname AS nickname
+      FROM listings
+      JOIN users ON listings.user_id = users.id
+      WHERE listings.id = $1
+      LIMIT 1
+    `;
     const result = await db.query(listing_query, [listing_id]);
     const listing = result[0];
-    
-    const images_query = `SELECT listing_images.image_url, listing_images.is_main FROM listing_images WHERE listing_images.listing_id = $1`;
+
+    const images_query = `
+      SELECT image_url, is_main 
+      FROM listing_images 
+      WHERE listing_id = $1
+    `;
     const listing_images = await db.query(images_query, [listing_id]);
 
-    console.log('Listing:', listing);
-
-    res.render('pages/listing', { listing, listing_images });
-
+    res.render('pages/listing', { listing, listing_images, user : req.session.user });
   } catch (error) {
     console.error('Error fetching listing:', error);
     res.status(500).send('Server Error');
   }
 });
+
 
 app.get('/account', (req, res) => {
   res.render('pages/account', {user: req.session.user});
@@ -362,13 +419,16 @@ app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten
 
     const time = new Date().toISOString();
     const status = "available";
+    const user = req.session.user
 
     // 
     const listingResult = await db.one(
-      'INSERT INTO listings (title, description, price, created_at, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      [item_name, description, pricing, time, time, status]
+      'INSERT INTO listings (title, user_id, description, price, created_at, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      [item_name, user.id, description, pricing, time, time, status]
     );
     const listingId = listingResult.id;
+
+    console.log(user.id)
 
     const imageQueries = []; //array of all the image queries that will be inserted into the database
     let isMain = true; // first image is the main one
