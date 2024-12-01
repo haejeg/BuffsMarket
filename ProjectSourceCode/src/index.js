@@ -94,6 +94,17 @@ app.get('/register', (req, res) => {
   res.render('pages/register');
 });
 
+// Chat page route
+app.get('/chat', (req, res) => {
+  // If you have user authentication, you might want to check if the user is logged in
+  if (!req.session.user) {
+    // Redirect to login page if the user is not authenticated
+    return res.redirect('/login');
+  }
+
+  res.render('pages/chat');
+});
+
 app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only logged in users can access certain pages
   try {
     const query = 
@@ -116,6 +127,63 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
   }
 });
 
+app.get('/messages', async (req, res) => {
+  const userId = req.session.user ? req.session.user.id : null;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const receivedMessages = await db.any(
+      `SELECT 
+        messages.content, 
+        TO_CHAR(messages.timestamp, 'FMMonth DD, YYYY HH12:MI AM') AS timestamp, 
+        users.nickname AS senderNickname
+       FROM messages
+       JOIN users ON messages.senderID = users.id
+       WHERE messages.receiverID = $1
+       ORDER BY messages.timestamp DESC`,
+      [userId]
+    );
+
+    res.json(receivedMessages);
+  } catch (error) {
+    console.error('Error fetching messages:', error.message);
+    res.status(500).json({ error: 'Error fetching messages' });
+  }
+});
+
+// POST /chat - Send a message
+app.post('/chat', async (req, res) => {
+  const { receiverID, content } = req.body;
+  const senderID = req.session.user.id; // Assuming the sender's ID is in the session
+
+  try {
+    // Validate the receiver's ID
+    const receiver = await db.oneOrNone('SELECT * FROM users WHERE id = $1', [receiverID]);
+
+    if (!receiver) {
+      return res.status(400).render('pages/chat', { message: 'Receiver ID is not valid.', error: true });
+    }
+
+    const timestamp = new Date().toISOString(); // Use current timestamp
+
+    // Insert the message into the messages table
+    await db.none('INSERT INTO messages (senderID, receiverID, content, timestamp) VALUES ($1, $2, $3, $4)',
+      [senderID, receiverID, content, timestamp]);
+
+    // Redirect to the message page or display a success message
+    res.render('pages/chat', {
+      message: [senderID, receiverID, content, timestamp],
+      receivedMessages: [], // Optionally fetch the latest messages after sending
+    });
+
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).render('pages/chat', { message: 'Error sending message. Please try again later.', error: true });
+  }
+});
 
 // Update Nickname
 app.post('/account/update-nickname', auth, async (req, res) => {

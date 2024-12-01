@@ -36,3 +36,22 @@ CREATE TABLE IF NOT EXISTS purchases (
     purchase_price DECIMAL(7, 2) NOT NULL,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  senderID INT NOT NULL,
+  receiverID INT NOT NULL,
+  content TEXT NOT NULL,
+  timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO messages (senderID, receiverID, content, timestamp)
+VALUES
+    (1, 8, 'hello1', CURRENT_TIMESTAMP),
+    (2, 7, 'hello2', CURRENT_TIMESTAMP),
+    (3, 6, 'hello3', CURRENT_TIMESTAMP),
+    (4, 5, 'hello4', CURRENT_TIMESTAMP),
+    (5, 4, 'hello5', CURRENT_TIMESTAMP),
+    (6, 3, 'hello6', CURRENT_TIMESTAMP),
+    (7, 2, 'hello7', CURRENT_TIMESTAMP),
+    (8, 1, 'hello8', CURRENT_TIMESTAMP);
