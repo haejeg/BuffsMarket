@@ -49,7 +49,8 @@
             <a class="nav-link transition" href="/home">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link transition" href="/messages">Messages</a>
+            <!-- Updated link to go to the /messages page -->
+            <a class="nav-link transition" href="/chat">Messages</a>
           </li>
         </ul>
         {{#if user.nickname}}
@@ -70,44 +71,43 @@
   </nav>
 
   <!-- Modal Structure -->
-<div class="modal fade" id="createListingModal" tabindex="-1" aria-labelledby="createListingModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="createListingModalLabel">Create New Listing</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Form structure inside modal -->
-        <div class="create_container">
-          <form method="POST" action="/home" class="w-100" enctype="multipart/form-data">
-            <div class="mb-3">
-              <label for="item_name" class="form-label">Item Name</label>
-              <input type="text" class="form-control" id="item_name" name="item_name" required>
-            </div>
-            <div class="mb-3">
-              {{> message}}
-              <label for="description" class="form-label">Item Description</label>
-              <input type="text" class="form-control" id="description" name="description" required>
-            </div>
-            <div class="mb-3">
-              <!-- Image Upload -->
-              <label for="imageUpload" class="form-label">Upload Image</label>
-              <input type="file" id="imageUpload" name="image" accept="image/*" required />
-              <div id="uploadStatus"></div> <!-- To show upload status -->
-            </div>
-            <div class="mb-3">
-              <label for="pricing" class="form-label">Item Price</label>
-              <input type="number" min="0.00" step="0.01" class="form-control" id="pricing" name="pricing" required>
-            </div>
-            <button type="submit" class="btn custom-btn transition">Create Listing</button>
-          </form>
+  <div class="modal fade" id="createListingModal" tabindex="-1" aria-labelledby="createListingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createListingModalLabel">Create New Listing</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Form structure inside modal -->
+          <div class="create_container">
+            <form method="POST" action="/home" class="w-100" enctype="multipart/form-data">
+              <div class="mb-3">
+                <label for="item_name" class="form-label">Item Name</label>
+                <input type="text" class="form-control" id="item_name" name="item_name" required>
+              </div>
+              <div class="mb-3">
+                {{> message}}
+                <label for="description" class="form-label">Item Description</label>
+                <input type="text" class="form-control" id="description" name="description" required>
+              </div>
+              <div class="mb-3">
+                <!-- Image Upload -->
+                <label for="imageUpload" class="form-label">Upload Image</label>
+                <input type="file" id="imageUpload" name="image" accept="image/*" required />
+                <div id="uploadStatus"></div> <!-- To show upload status -->
+              </div>
+              <div class="mb-3">
+                <label for="pricing" class="form-label">Item Price</label>
+                <input type="number" min="0.00" step="0.01" class="form-control" id="pricing" name="pricing" required>
+              </div>
+              <button type="submit" class="btn custom-btn transition">Create Listing</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeo7F9M49M30+YT1q+glXv7z7L3EOzCtB1XXQz9Dfxsb5g7f" crossorigin="anonymous"></script>
 </body>

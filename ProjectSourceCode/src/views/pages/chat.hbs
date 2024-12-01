@@ -1,0 +1,59 @@
+<!-- message.hbs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Messages</h1>
+  <!-- Message Sending Form -->
+  <section>
+    <h2>Send a Message</h2>
+    <form action="/chat" method="POST">
+      <label for="receiverEmail">Receiver Email:</label>
+      <input type="email" id="receiverEmail" name="receiverEmail" required>
+
+      <label for="content">Message:</label>
+      <textarea id="content" name="content" required></textarea>
+
+      <button type="submit">Send</button>
+    </form>
+
+    {{#if message}}
+      <div class="message {{#if error}}error{{/if}}">
+        {{message}}
+      </div>
+    {{/if}}
+  </section>
+
+  <!-- Received Messages -->
+  <section>
+    <h2>Your Messages</h2>
+
+    {{#if receivedMessages}}
+      {{#if receivedMessages.length}}
+        <ul>
+          {{#each receivedMessages}}
+            <li>
+              <strong>{{this.senderNickname}}</strong> ({{this.timestamp}}):
+              <p>{{this.content}}</p>
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p>You have no messages yet.</p>
+      {{/if}}
+    {{else}}
+      <p>Error fetching messages.</p>
+    {{/if}}
+  </section>
+
+  <footer>
+    <p>&copy; 2024 Your Application</p>
+  </footer>
+</body>
+</html>
