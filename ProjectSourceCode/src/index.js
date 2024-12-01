@@ -47,6 +47,7 @@ const pool = new Pool({
     } else {
       console.log('Database connected successfully:', res.rows[0]);
     }
+  })
 
 
 // *****************************************************
