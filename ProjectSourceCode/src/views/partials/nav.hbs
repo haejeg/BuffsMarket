@@ -24,7 +24,7 @@
       color: gray !important;
     }
     .text-spacing {
-      padding-left: 15px !important;
+      {{!-- padding-left: 15px !important; --}}
       padding-right: 5px !important;
     }
     .nav-spacing {
@@ -54,13 +54,19 @@
         </ul>
         {{#if user.nickname}}
         <!-- Search bar and account link -->
-        <form class="d-flex me-3" method="GET" action="/search">
-          <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-dark" type="submit">Search</button>
+        <form class="d-flex" method="GET" action="/search">
+        <div style="padding-right: 5px">
+<input class="form-control" type="search" name="query" placeholder="Search" aria-label="Search">
+        </div>
+          <div style="padding-right: 5px">
+<button class="btn btn-outline-dark"  type="submit">Search</button>
+          </div>
         </form>
-        <button type="button" class="btn btn-dark ms-2" data-bs-toggle="modal" data-bs-target="#createListingModal">
+        <div style="padding-right: 5px">
+<button type="button" class="btn btn-dark"  data-bs-toggle="modal" data-bs-target="#createListingModal">
           Create new listing
         </button>
+        </div>
         <div>
           <a href="/account" class="nav-link text-dark text-spacing"> {{user.nickname}} </a> 
         </div>
