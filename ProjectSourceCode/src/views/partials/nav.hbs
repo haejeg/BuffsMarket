@@ -24,7 +24,7 @@
       color: gray !important;
     }
     .text-spacing {
-      {{!-- padding-left: 15px !important; --}}
+      padding-left: 15px !important;
       padding-right: 5px !important;
     }
     .nav-spacing {
@@ -54,18 +54,13 @@
         </ul>
         {{#if user.nickname}}
         <!-- Search bar and account link -->
-        <form class="d-flex" style="padding-right: 5px" method="GET" action="/search">
-        <div style="padding-right: 5px"> 
-          <input class="form-control" type="search"  name="query" placeholder="Search" aria-label="Search">
-        </div>
+        <form class="d-flex me-3" method="GET" action="/search">
+          <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-dark" type="submit">Search</button>
         </form>
-        <div style="padding-right: 8px">
-<button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#createListingModal">
+        <button type="button" class="btn btn-dark ms-2" data-bs-toggle="modal" data-bs-target="#createListingModal">
           Create new listing
         </button>
-        </div>
-        
         <div>
           <a href="/account" class="nav-link text-dark text-spacing"> {{user.nickname}} </a> 
         </div>
@@ -85,7 +80,7 @@
       <div class="modal-body">
         <!-- Form structure inside modal -->
         <div class="create_container">
-          <form method="POST" action="/home" class="w-100">
+          <form method="POST" action="/home" class="w-100" enctype="multipart/form-data">
             <div class="mb-3">
               <label for="item_name" class="form-label">Item Name</label>
               <input type="text" class="form-control" id="item_name" name="item_name" required>
@@ -95,46 +90,70 @@
               <label for="description" class="form-label">Item Description</label>
               <input type="text" class="form-control" id="description" name="description" required>
             </div>
-            <div class="mb-3">
-              <!-- Image Upload -->
-              <label for="imageUpload" class="form-label">Upload Image</label>
-              <input type="file" id="imageUpload" name="image" accept="image/*" required />
-              <div id="uploadStatus"></div> <!-- To show upload status -->
+            <div id="imageUploadContainer">
+              <div class="mb-3 image-upload-group">
+                <label for="imageUpload" class="form-label">Upload Image</label>
+                <input type="file" id="imageUpload" name="image[]" accept="image/*" required />
+                <div id="uploadStatus"></div> <!-- To show upload status -->
+              </div>
             </div>
+            <button type="button" id="addImageUpload"  class="btn custom-btn transition">+ Add More Images</button>
+            <script> //recreate the image upload button so that multiple images can be uploaded
+              document.getElementById('addImageUpload').addEventListener('click', function () {
+                // Create a new div for the image upload field
+                const newImageUploadGroup = document.createElement('div');
+                newImageUploadGroup.classList.add('mb-3', 'image-upload-group');
+
+                // New label 
+                const newLabel = document.createElement('label');
+                newLabel.classList.add('form-label');
+                newLabel.textContent = 'Upload Image';
+
+                // Create the input field
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.name = 'image[]'; // Use array notation to allow multiple files
+                newInput.accept = 'image/*';
+                newInput.required = true;
+
+                // Create the upload status div
+                const uploadStatusDiv = document.createElement('div');
+
+                // Remove button code
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.textContent = 'Remove';
+                removeButton.classList.add('btn', 'btn-danger', 'btn-sm', 'mt-2');
+                
+                // create an event listener for the remove button
+                removeButton.addEventListener('click', function () {
+                  newImageUploadGroup.remove(); // Remove the entire group
+                });
+
+                // Append elements to the new div
+                newImageUploadGroup.appendChild(newLabel);
+                newImageUploadGroup.appendChild(newInput);
+                newImageUploadGroup.appendChild(uploadStatusDiv);
+                newImageUploadGroup.appendChild(removeButton);
+
+
+                // add the new div to the container so that the button will appear
+                document.getElementById('imageUploadContainer').appendChild(newImageUploadGroup);
+              });
+            </script>
+
             <div class="mb-3">
               <label for="pricing" class="form-label">Item Price</label>
               <input type="number" min="0.00" step="0.01" class="form-control" id="pricing" name="pricing" required>
             </div>
             <button type="submit" class="btn custom-btn transition">Create Listing</button>
           </form>
-            <script>
-              document.getElementById('imageUpload').addEventListener('change', async function () {
-                const fileInput = this;
-                const file = fileInput.files[0];
-                if (file) {
-                  const formData = new FormData();
-                  formData.append('image', file); // 'image' should match the field name in multer config (upload.single('image'))
-
-                  try {
-                    const response = await fetch('/uploadImage', {
-                      method: 'POST',
-                      body: formData
-                    });
-
-                    const result = await response.text();
-                    document.getElementById('uploadStatus').innerText = result;
-                  } catch (error) {
-                    console.error('Error uploading image:', error);
-                    document.getElementById('uploadStatus').innerText = 'Image upload failed';
-                  }
-                }
-              });
-            </script>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeo7F9M49M30+YT1q+glXv7z7L3EOzCtB1XXQz9Dfxsb5g7f" crossorigin="anonymous"></script>
 </body>
