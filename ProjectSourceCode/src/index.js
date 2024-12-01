@@ -130,32 +130,41 @@ app.get('/home', auth, async (req, res) => {
   }
 });
 
-app.get('/messages', async (req, res) => {
-  const userId = req.session.user ? req.session.user.id : null;
-
-  if (!userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+app.get('/messages', auth, async (req, res) => {
+  const { receiverID } = req.query;
+  const userId = req.session.user.id;
 
   try {
-    const receivedMessages = await db.any(
+    const messages = await db.any(
       `SELECT 
         messages.content, 
         TO_CHAR(messages.timestamp, 'FMMonth DD, YYYY HH12:MI AM') AS timestamp, 
         users.nickname AS sendernickname
        FROM messages
        JOIN users ON messages.senderID = users.id
-       WHERE messages.receiverID = $1
-       ORDER BY messages.timestamp DESC`,
-      [userId]
+       WHERE (messages.senderID = $1 AND messages.receiverID = $2)
+          OR (messages.senderID = $2 AND messages.receiverID = $1)
+       ORDER BY messages.timestamp ASC`,
+      [userId, receiverID]
     );
-
-    res.json(receivedMessages);
-  } catch (error) {
-    console.error('Error fetching messages:', error.message);
+    res.json(messages);
+  } catch (err) {
+    console.error('Error fetching messages:', err);
     res.status(500).json({ error: 'Error fetching messages' });
   }
 });
+
+app.get('/users', auth, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const users = await db.any('SELECT id, nickname FROM users WHERE id != $1', [userId]);
+    res.json(users);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ error: 'Error fetching users' });
+  }
+});
+
 
 app.post('/chat', async (req, res) => {
   const { receiverID, content } = req.body;
@@ -180,7 +189,6 @@ app.post('/chat', async (req, res) => {
       'INSERT INTO messages (senderID, receiverID, content, timestamp) VALUES ($1, $2, $3, $4)',
       [senderID, receiverID, content, timestamp]
     );
-
     res.render('pages/chat', { message: 'Message sent successfully.', error: false });
   } catch (error) {
     console.error('Error sending message:', error);
@@ -190,7 +198,6 @@ app.post('/chat', async (req, res) => {
 
 // Update Nickname
 app.post('/account/update-nickname', auth, async (req, res) => {
-  //this is pretty nice, im thinking we could have an anoymous mode vs non anoymous mode or sum like that lol
   const { nickname } = req.body;
   const userId = req.session.user.id; // Assuming `id` is the user's primary key in the session
   try {
