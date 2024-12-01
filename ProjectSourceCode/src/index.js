@@ -21,31 +21,37 @@ const upload = multer({ dest: 'uploads/' }); // Files will be temporarily saved 
 // *****************************************************
 
 
+const db = pgp({
+  connectionString: process.env.DATABASE_URL, // Render automatically injects this environment variable
+  ssl: {
+      rejectUnauthorized: false, // Required for secure connections in Render
+  },
+});
+
 const hbs = handlebars.create({
   extname: 'hbs',
   layoutsDir: path.join(__dirname, 'views/layouts'),
   partialsDir: path.join(__dirname, 'views/partials'),
 });
 
-const dbConfig = {
-  host: 'db',
-  port: 5432,
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-};
 
-const db = pgp(dbConfig);
 
-db.connect()
-  .then((obj) => {
-    console.log('Database connection successful');
-    obj.done();
-  })
-  .catch((error) => {
-    console.log('ERROR:', error.message || error);
+const { Pool } = require('pg');
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL, // Render will automatically inject this into your environment
+    ssl: {
+      rejectUnauthorized: false, // Required for secure connections on Render
+    },
   });
 
+  // Test the connection
+  pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+      console.error('Error connecting to the database:', err);
+    } else {
+      console.log('Database connected successfully:', res.rows[0]);
+    }
+  });
 
 
 // *****************************************************
@@ -270,29 +276,11 @@ const { Storage } = require('@google-cloud/storage');
 
 // Initialize a Storage client with the credentials
 const storage = new Storage({
-  keyFilename: 'melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
+  keyFilename: '/etc/secrets/melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
-// Function to upload an image
-async function uploadImage(bucketName, filePath, destination) {
-  try {
-    // Uploads a file to the bucket
-    await storage.bucket(bucketName).upload(filePath, {
-      destination: destination, // Destination in the bucket
-    });
 
-    console.log(`${filePath} uploaded to ${bucketName}/${destination}`);
-  } catch (error) {
-    console.error('Error uploading the file:', error);
-  }
-}
-
-// Usage example
-
-
-
-
-// // Route to handle file uploads
+// // Route to handle file uploads (NOT USED ANYMORE!!)
 // app.post('/uploadImage', upload.single('image'), async (req, res) => {
 //   const filePath = req.file.path; // The temporary file path created by multer
 //   const originalFileName = req.file.originalname;
@@ -382,34 +370,32 @@ app.post('/register', async (req, res) => {
   }
 });
 
-const bucketName = 'testbruh_paq'; // Replace with your bucket name
+const bucketName = 'testbruh_paq'; // bucket name (for now might change the bucket later)
 async function makeBucketPublic() {
-  await storage.bucket(bucketName).makePublic();
-
+  await storage.bucket(bucketName).makePublic();//make the bucket public so that images can be inserted
   console.log(`Bucket ${bucketName} is now publicly readable`);
 }
 
-app.post('/home', upload.single('image'), async (req, res) => {
+app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten images otherwise error
   try {
-    console.log("Request body:", req.body); // Add this to debug
-    console.log("Uploaded file:", req.file); // Add this to check file upload
+    console.log("Request body:", req.body);
+    console.log("Uploaded files:", req.files);
 
     const { item_name, description, pricing } = req.body;
     if (!item_name || !description || !pricing) {
       return res.status(400).send("Missing required fields");
     }
 
-    const filePath = req.file.path; // Image file path from multer
-    const originalFileName = req.file.originalname;
     const time = new Date().toISOString();
     const status = "available";
 
-    // Step 1: Create the listing and get the new listing_id
+    // 
     const listingResult = await db.one(
       'INSERT INTO listings (title, description, price, created_at, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
       [item_name, description, pricing, time, time, status]
     );
     const listingId = listingResult.id;
+
 
     // Step 2: Upload the image to Google Cloud Storage
     // Replace with your actual bucket name
@@ -418,16 +404,37 @@ app.post('/home', upload.single('image'), async (req, res) => {
       destination: destination,
     });
 
-    // Step 3: Generate the image URL
-    const imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+    const imageQueries = []; //array of all the image queries that will be inserted into the database
+    let isMain = true; // first image is the main one
 
-    // Step 4: Save the image URL to the database
-    await db.none(
-      'INSERT INTO listing_images (listing_id, image_url, is_main) VALUES ($1, $2, $3)',
-      [listingId, imageUrl, true]
-    );
 
-    console.log(`Listing created with ID: ${listingId}, Image URL: ${imageUrl}`);
+    for (const file of req.files) {
+      const uniqueFileName = `${Date.now()}-${file.originalname}`; //date + filename so its unique
+      const destination = uniqueFileName;
+
+      // put the file into the google cloud storage
+      await storage.bucket(bucketName).upload(file.path, {
+        destination: destination,
+      });
+
+      // image url to be inserted into the database
+      const imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+
+      // Add query to insert image into the database
+      imageQueries.push(
+        db.none(
+          'INSERT INTO listing_images (listing_id, image_url, is_main) VALUES ($1, $2, $3)',
+          [listingId, imageUrl, isMain]
+        )
+      );
+
+      isMain = false; // Only the first image is the main image
+    }
+
+    // Run all image insert queries
+    await Promise.all(imageQueries);
+
+    console.log(`Listing created with ID: ${listingId}`);
     res.redirect('/home');
   } catch (err) {
     console.error("Error creating listing:", err);
@@ -436,7 +443,16 @@ app.post('/home', upload.single('image'), async (req, res) => {
 });
 
 
-
+// Logout route
+app.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Failed to destroy session:', err);
+      return res.status(500).send('Error logging out');
+    }
+    res.render('pages/login', { message: 'Logged out Successfully' });
+  });
+});
 
 /*
 app.post('/register', async (req, res) => {
@@ -488,8 +504,9 @@ app.post('/login', async (req, res) => {
           console.error('Error saving session:', err);
           return res.render('pages/login', { message: 'An unexpected error occurred. Please try again later.', error: true });
         }
-        res.redirect('/account');
-      });
+
+        res.redirect('/home');
+      }); 
     } else {
       // Incorrect password, render login with an error message
       console.log(`Login attempt failed: Incorrect password for user "${email}".`);
@@ -548,6 +565,57 @@ app.get('/logout', (req, res) => {
     // Render the logout page with a success message
     res.render('pages/logout', { message: 'Logged out Successfully' });
   });
+});
+
+app.get('/search', async (req, res) => {
+  try {
+      const name = req.query.query;
+
+      let listings;
+      let error = false;
+      let message = '';
+
+      if (!name) {
+          // Fetch all listings if search term is missing
+          message = 'Search term is required. Showing all listings.';
+          error = true;
+
+          const query = `
+              SELECT 
+                  listings.id AS listing_id,
+                  listings.title,
+                  listings.price,
+                  TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date,
+                  listing_images.image_url
+              FROM listings
+              LEFT JOIN listing_images
+                  ON listings.id = listing_images.listing_id
+                  AND listing_images.is_main = TRUE
+          `;
+          listings = await db.any(query);
+      } else {
+          // Fetch listings matching the search term
+          const query = `
+              SELECT 
+                  listings.id AS listing_id,
+                  listings.title,
+                  listings.price,
+                  TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date,
+                  listing_images.image_url
+              FROM listings
+              LEFT JOIN listing_images
+                  ON listings.id = listing_images.listing_id
+                  AND listing_images.is_main = TRUE
+              WHERE LOWER(listings.title) LIKE $1
+          `;
+          listings = await db.any(query, [`%${name.toLowerCase()}%`]);
+      }
+
+      res.render('pages/home', { listings, user: req.session.user, message, error });
+  } catch (error) {
+      console.error('Error fetching listings:', error);
+      res.status(500).send('Server Error');
+  }
 });
 
 
