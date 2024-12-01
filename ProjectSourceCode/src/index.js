@@ -214,30 +214,31 @@ async function uploadImage(bucketName, filePath, destination) {
 }
 
 // Usage example
-const bucketName = 'buffm_images'; // Replace with your bucket name
 
 
 
-// Route to handle file uploads
-app.post('/uploadImage', upload.single('image'), async (req, res) => {
-  const filePath = req.file.path; // The temporary file path created by multer
-  const originalFileName = req.file.originalname;
-  const destination = originalFileName; // You can modify this if you want to rename it on GCS
 
-  try {
-    // Upload the file to Google Cloud Storage
-    await storage.bucket(bucketName).upload(filePath, {
-      destination: destination,
-    });
-    res.send(`${originalFileName} uploaded to ${bucketName}/${destination}`);
-    imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
-// Save this imageUrl along with other listing data in your database
+// // Route to handle file uploads
+// app.post('/uploadImage', upload.single('image'), async (req, res) => {
+//   const filePath = req.file.path; // The temporary file path created by multer
+//   const originalFileName = req.file.originalname;
+//   const destination = originalFileName; // You can modify this if you want to rename it on GCS
 
-  } catch (error) {
-    console.error('Error uploading the file:', error);
-    res.status(500).send('Failed to upload image');
-  }
-});
+//   try {
+//     // Upload the file to Google Cloud Storage
+//     await storage.bucket(bucketName).upload(filePath, {
+//       destination: destination,
+//     });
+//     res.send(`${originalFileName} uploaded to ${bucketName}/${destination}`);
+//     imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+    
+// // Save this imageUrl along with other listing data in your database
+
+//   } catch (error) {
+//     console.error('Error uploading the file:', error);
+//     res.status(500).send('Failed to upload image');
+//   }
+// });
 
 app.get('/listing', async (req, res) => {
   try {
@@ -307,33 +308,60 @@ app.post('/register', async (req, res) => {
   }
 });
 
+const bucketName = 'testbruh_paq'; // Replace with your bucket name
+async function makeBucketPublic() {
+  await storage.bucket(bucketName).makePublic();
 
-app.post('/home', async (req, res) => {
+  console.log(`Bucket ${bucketName} is now publicly readable`);
+}
+makeBucketPublic().catch(console.error);
+
+app.post('/home', upload.single('image'), async (req, res) => {
   try {
-    console.log("CREATING NEW OBJECT...");
+    console.log("Request body:", req.body); // Add this to debug
+    console.log("Uploaded file:", req.file); // Add this to check file upload
+
     const { item_name, description, pricing } = req.body;
+    if (!item_name || !description || !pricing) {
+      return res.status(400).send("Missing required fields");
+    }
+
+    const filePath = req.file.path; // Image file path from multer
+    const originalFileName = req.file.originalname;
     const time = new Date().toISOString();
     const status = "available";
 
-    // Retrieve the highest id and increment it -d
-    // we also should do something similar for userid -d
-    const result = await db.one('SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM listings');
-    const nextId = result.next_id;
-    // we need to add image upload somehow if somebody can figure that out -d
-    const query = 'INSERT INTO listings (id, title, description, price, created_at, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6, $7)';
-    const values = [nextId, item_name, description, pricing, time, time, status];
+    // Step 1: Create the listing and get the new listing_id
+    const listingResult = await db.one(
+      'INSERT INTO listings (title, description, price, created_at, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      [item_name, description, pricing, time, time, status]
+    );
+    const listingId = listingResult.id;
 
-    await db.none(query, values);
+    // Step 2: Upload the image to Google Cloud Storage
+     // Replace with your actual bucket name
+    const destination = originalFileName;
+    await storage.bucket(bucketName).upload(filePath, {
+      destination: destination,
+    });
+
+    // Step 3: Generate the image URL
+    const imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+
+    // Step 4: Save the image URL to the database
+    await db.none(
+      'INSERT INTO listing_images (listing_id, image_url, is_main) VALUES ($1, $2, $3)',
+      [listingId, imageUrl, true]
+    );
+
+    console.log(`Listing created with ID: ${listingId}, Image URL: ${imageUrl}`);
     res.redirect('/home');
   } catch (err) {
-    console.error(err);
-    if (err.code === '23505') { // PostgreSQL unique violation error code
-      res.render('pages/home', { message: 'Product already registered. Please use a different product.', error: true }); // i copied this from register but i'm not sure if this is needed -d
-    } else {
-      res.status(500).send('Error creating listing');
-    }
+    console.error("Error creating listing:", err);
+    res.status(500).send("Error creating listing or uploading image");
   }
 });
+
 
 
 
