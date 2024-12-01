@@ -1,4 +1,3 @@
-<!-- message.hbs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,12 +9,14 @@
 <body>
   <header>
     <h1>Messages</h1>
+  </header>
+
   <!-- Message Sending Form -->
   <section>
     <h2>Send a Message</h2>
     <form action="/chat" method="POST">
-      <label for="receiverEmail">Receiver Email:</label>
-      <input type="email" id="receiverEmail" name="receiverEmail" required>
+      <label for="receiverID">Receiver ID:</label>
+      <input type="id" id="receiverID" name="receiverID" required>
 
       <label for="content">Message:</label>
       <textarea id="content" name="content" required></textarea>

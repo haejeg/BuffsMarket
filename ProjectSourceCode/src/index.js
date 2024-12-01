@@ -125,13 +125,12 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
   }
 });
 
+// GET /chat - Fetch and display received messages
 app.get('/chat', async (req, res) => {
-  // If you have user authentication, you might want to check if the user is logged in
   const userId = req.session.user ? req.session.user.id : null;
 
   if (!userId) {
-    // Redirect to login page if the user is not authenticated
-    return res.redirect('/login');
+    return res.redirect('/login'); // Redirect to login if the user is not authenticated
   }
 
   try {
@@ -139,56 +138,60 @@ app.get('/chat', async (req, res) => {
     const receivedMessages = await db.any(
       `SELECT messages.content, messages.timestamp, users.nickname AS senderNickname
        FROM messages
-       JOIN users ON messages.sender_id = users.id
-       WHERE messages.receiver_id = $1
+       JOIN users ON messages.senderID = users.id
+       WHERE messages.receiverID = $1
        ORDER BY messages.timestamp DESC`,
       [userId]
     );
 
+    // Log received messages for debugging
+    console.log(receivedMessages);
+
     // Render the message page and pass the received messages
-    res.render('pages/message', {
+    res.render('pages/chat', {
       receivedMessages,
-      message: req.session.message || null // Display any message (e.g., success/error)
+      message: req.session.message || null, // Display any message (e.g., success/error)
     });
 
-    // Clear the message after rendering
     req.session.message = null;
 
   } catch (error) {
     console.error('Error fetching messages:', error);
-    res.render('pages/message', {
+    res.render('pages/chat', {
       message: 'Error fetching messages. Please try again later.',
       error: true
     });
   }
 });
 
-// Send a message route (MIGHT NOT WORK)
+// POST /chat - Send a message
 app.post('/chat', async (req, res) => {
-  const { receiverEmail, content } = req.body;
-  const senderId = req.session.user.id; // Assuming the sender's ID is in the session
+  const { receiverID, content } = req.body;
+  const senderID = req.session.user.id; // Assuming the sender's ID is in the session
 
   try {
-    // Validate the receiver's email
-    const receiver = await db.oneOrNone('SELECT * FROM users WHERE email = $1', [receiverEmail]);
+    // Validate the receiver's ID
+    const receiver = await db.oneOrNone('SELECT * FROM users WHERE id = $1', [receiverID]);
 
     if (!receiver) {
-      return res.status(400).render('pages/message', { message: 'Receiver email is not valid.', error: true });
+      return res.status(400).render('pages/chat', { message: 'Receiver ID is not valid.', error: true });
     }
 
-    const receiverId = receiver.id;
     const timestamp = new Date().toISOString(); // Use current timestamp
 
     // Insert the message into the messages table
-    await db.none('INSERT INTO messages (sender_id, receiver_id, content, timestamp) VALUES ($1, $2, $3, $4)',
-      [senderId, receiverId, content, timestamp]);
+    await db.none('INSERT INTO messages (senderID, receiverID, content, timestamp) VALUES ($1, $2, $3, $4)',
+      [senderID, receiverID, content, timestamp]);
 
     // Redirect to the message page or display a success message
-    res.render('pages/message', { message: 'Message sent successfully!' });
+    res.render('pages/chat', {
+      message: 'Message sent successfully!',
+      receivedMessages: [], // Optionally fetch the latest messages after sending
+    });
 
   } catch (error) {
     console.error('Error sending message:', error);
-    res.status(500).render('pages/message', { message: 'Error sending message. Please try again later.', error: true });
+    res.status(500).render('pages/chat', { message: 'Error sending message. Please try again later.', error: true });
   }
 });
 
