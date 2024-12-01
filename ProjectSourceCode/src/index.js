@@ -20,6 +20,7 @@ const upload = multer({ dest: 'uploads/' }); // Files will be temporarily saved 
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
 
+
 const db = pgp({
   connectionString: process.env.DATABASE_URL, // Render automatically injects this environment variable
   ssl: {
@@ -201,7 +202,7 @@ const { Storage } = require('@google-cloud/storage');
 
 // Initialize a Storage client with the credentials
 const storage = new Storage({
-  keyFilename: 'melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
+  keyFilename: '/etc/secrets/melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
 
