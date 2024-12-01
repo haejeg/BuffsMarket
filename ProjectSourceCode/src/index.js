@@ -157,25 +157,31 @@ app.get('/messages', async (req, res) => {
   }
 });
 
-// POST /chat - Send a message
 app.post('/chat', async (req, res) => {
   const { receiverID, content } = req.body;
-  const senderID = req.session.user.id; // Assuming the sender's ID is in the session
+  const senderID = req.session.user?.id;
+
+  if (!senderID) {
+    return res.status(401).render('pages/chat', { message: 'User not authenticated.', error: true });
+  }
+
   try {
     // Validate the receiver's ID
     const receiver = await db.oneOrNone('SELECT * FROM users WHERE id = $1', [receiverID]);
     if (!receiver) {
       return res.status(400).render('pages/chat', { message: 'Receiver ID is not valid.', error: true });
     }
-    const timestamp = new Date().toISOString(); // Use current timestamp
-    // Insert the message into the messages table
-    await db.none('INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
-      [senderID, receiverID, content, timestamp]);
-    // Redirect to the message page or display a success message
-    res.render('pages/chat', {
-      message: [senderID, sendernickname, receiverID, content, timestamp],
-      receivedMessages: [], // Optionally fetch the latest messages after sending
-    });
+
+    const timestamp = new Date().toISOString();
+    const senderNickname = req.session.user.nickname || 'Anonymous';
+
+    // Insert the message into the database
+    await db.none(
+      'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
+      [senderID, senderNickname, receiverID, content, timestamp]
+    );
+
+    res.render('pages/chat', { message: 'Message sent successfully.', error: false });
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).render('pages/chat', { message: 'Error sending message. Please try again later.', error: true });
