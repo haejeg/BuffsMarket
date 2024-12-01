@@ -87,7 +87,7 @@
           throw new Error('Failed to fetch messages');
         }
         const messages = await response.json();
-        console.log(messages); // Debugging purposes, lets maybe remove this later.
+        console.log(messages); // Debugging purposes, lets maybe remove this later. Checkpoint 1.
 
         // Hide the loading message
         loadingMessage.textContent = '';
@@ -102,10 +102,10 @@
         } else {
           messages.forEach((message) => {
             const listItem = document.createElement('li');
-            console.log(message.senderNickname) //Another debugging checkpoint
+            console.log(message.sendernickname) //Another debugging checkpoint
             listItem.className = 'list-group-item bg-dark text-white';
             listItem.innerHTML = `
-              <strong>${message.senderNickname}</strong> <small class="text-muted">(${message.timestamp})</small>:
+              <strong>${message.sendernickname}</strong> <small class="text-muted">(${message.timestamp})</small>:
               <p class="mb-0">${message.content}</p>
             `;
             messagesList.appendChild(listItem);
