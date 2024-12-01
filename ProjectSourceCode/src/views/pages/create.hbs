@@ -1,0 +1,35 @@
+{{!-- views/pages/create.handlebars --}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Listing</title>
+    <link rel="stylesheet" href="/path/to/your/styles.css"> <!-- Adjust path as needed -->
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1>Create New Listing</h1>
+    <div class="create_container mt-4">
+        <form method="POST" action="/home" class="w-100">
+            <div class="mb-3">
+                <label for="item_name" class="form-label">Item Name</label>
+                <input type="text" class="form-control" id="item_name" name="item_name" required>
+            </div>
+            <div class="mb-3">
+                {{> message}} <!-- Partial to display messages if any -->
+                <label for="description" class="form-label">Item Description</label>
+                <input type="text" class="form-control" id="description" name="description" required>
+            </div>
+            <div class="mb-3">
+                <label for="pricing" class="form-label">Item Price</label>
+                <input type="number" min="0.00" step="0.01" class="form-control" id="pricing" name="pricing" required>
+            </div>
+            <button type="submit" class="btn custom-btn transition">Create Listing</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
