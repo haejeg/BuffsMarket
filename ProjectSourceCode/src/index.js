@@ -199,26 +199,8 @@ const storage = new Storage({
   keyFilename: 'melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
-// Function to upload an image
-async function uploadImage(bucketName, filePath, destination) {
-  try {
-    // Uploads a file to the bucket
-    await storage.bucket(bucketName).upload(filePath, {
-      destination: destination, // Destination in the bucket
-    });
 
-    console.log(`${filePath} uploaded to ${bucketName}/${destination}`);
-  } catch (error) {
-    console.error('Error uploading the file:', error);
-  }
-}
-
-// Usage example
-
-
-
-
-// // Route to handle file uploads
+// // Route to handle file uploads (NOT USED ANYMORE!!)
 // app.post('/uploadImage', upload.single('image'), async (req, res) => {
 //   const filePath = req.file.path; // The temporary file path created by multer
 //   const originalFileName = req.file.originalname;
@@ -308,52 +290,62 @@ app.post('/register', async (req, res) => {
   }
 });
 
-const bucketName = 'testbruh_paq'; // Replace with your bucket name
+const bucketName = 'testbruh_paq'; // bucket name (for now might change the bucket later)
 async function makeBucketPublic() {
-  await storage.bucket(bucketName).makePublic();
-
+  await storage.bucket(bucketName).makePublic();//make the bucket public so that images can be inserted
   console.log(`Bucket ${bucketName} is now publicly readable`);
 }
 
-app.post('/home', upload.single('image'), async (req, res) => {
+app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten images otherwise error
   try {
-    console.log("Request body:", req.body); // Add this to debug
-    console.log("Uploaded file:", req.file); // Add this to check file upload
+    console.log("Request body:", req.body);
+    console.log("Uploaded files:", req.files);
 
     const { item_name, description, pricing } = req.body;
     if (!item_name || !description || !pricing) {
       return res.status(400).send("Missing required fields");
     }
 
-    const filePath = req.file.path; // Image file path from multer
-    const originalFileName = req.file.originalname;
     const time = new Date().toISOString();
     const status = "available";
 
-    // Step 1: Create the listing and get the new listing_id
+    // 
     const listingResult = await db.one(
       'INSERT INTO listings (title, description, price, created_at, updated_at, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
       [item_name, description, pricing, time, time, status]
     );
     const listingId = listingResult.id;
 
-    // Step 2: Upload the image to Google Cloud Storage
-     // Replace with your actual bucket name
-    const destination = originalFileName;
-    await storage.bucket(bucketName).upload(filePath, {
-      destination: destination,
-    });
+    const imageQueries = []; //array of all the image queries that will be inserted into the database
+    let isMain = true; // first image is the main one
 
-    // Step 3: Generate the image URL
-    const imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+    for (const file of req.files) {
+      const uniqueFileName = `${Date.now()}-${file.originalname}`; //date + filename so its unique
+      const destination = uniqueFileName;
 
-    // Step 4: Save the image URL to the database
-    await db.none(
-      'INSERT INTO listing_images (listing_id, image_url, is_main) VALUES ($1, $2, $3)',
-      [listingId, imageUrl, true]
-    );
+      // put the file into the google cloud storage
+      await storage.bucket(bucketName).upload(file.path, {
+        destination: destination,
+      });
 
-    console.log(`Listing created with ID: ${listingId}, Image URL: ${imageUrl}`);
+      // image url to be inserted into the database
+      const imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+
+      // Add query to insert image into the database
+      imageQueries.push(
+        db.none(
+          'INSERT INTO listing_images (listing_id, image_url, is_main) VALUES ($1, $2, $3)',
+          [listingId, imageUrl, isMain]
+        )
+      );
+
+      isMain = false; // Only the first image is the main image
+    }
+
+    // Run all image insert queries
+    await Promise.all(imageQueries);
+
+    console.log(`Listing created with ID: ${listingId}`);
     res.redirect('/home');
   } catch (err) {
     console.error("Error creating listing:", err);
