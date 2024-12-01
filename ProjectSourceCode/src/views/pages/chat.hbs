@@ -102,12 +102,14 @@
         } else {
           messages.forEach((message) => {
             const listItem = document.createElement('li');
+            console.log(message.senderNickname) //Another debugging checkpoint
             listItem.className = 'list-group-item bg-dark text-white';
             listItem.innerHTML = `
               <strong>${message.senderNickname}</strong> <small class="text-muted">(${message.timestamp})</small>:
               <p class="mb-0">${message.content}</p>
             `;
             messagesList.appendChild(listItem);
+            console.log(listItem) //Checkpoint #3, although this should be straight output
           });
         }
       } catch (error) {
