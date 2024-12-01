@@ -16,6 +16,16 @@ const fs = require('fs');
 
 // Configure Multer for file uploads
 const upload = multer({ dest: 'uploads/' }); // Files will be temporarily saved in 'uploads' directory
+
+// Socket.io stuff
+//const express = require('express');  //NEW ADDITIONS
+const http = require('http');
+const { Server } = require('socket.io');
+
+//const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
@@ -476,6 +486,11 @@ app.get('/logout', (req, res) => {
   });
 });
 
+app.get('/messages', (req, res) => {
+  res.render('pages/messages');
+
+})
+
 
 
 // Authentication Middleware
@@ -486,6 +501,86 @@ function auth(req, res, next) {
   next();
 }
 
+
+// Socket.IO logic
+io.on('connection', (socket) => {
+  console.log(`User connected: ${socket.id}`);
+
+  socket.on('joinRoom', (roomId) => {
+      socket.join(roomId);
+      console.log(`User joined room: ${roomId}`);
+  });
+
+  socket.on('sendMessage', ({ roomId, senderId, message }) => {
+      const timestamp = new Date();
+
+      // Save the message to the database (if necessary)
+      // Example query:
+      // await pool.query(
+      //     `INSERT INTO messages (room_id, sender_id, content, created_at)
+      //      VALUES ($1, $2, $3, $4)`,
+      //     [roomId, senderId, message, timestamp]
+      // );
+
+      // Broadcast the message to the room
+      io.to(roomId).emit('receiveMessage', { senderId, content: message, createdAt: timestamp });
+  });
+
+  socket.on('disconnect', () => {
+      console.log(`User disconnected: ${socket.id}`);
+  });
+});
+
+socket.on('sendMessage', ({ roomId, senderId, message }) => {
+  // Validate input
+  if (!roomId || !senderId || !message) {
+      console.error('Invalid message payload:', { roomId, senderId, message });
+      return;
+  }
+
+  // Broadcast the message to everyone in the room
+  io.to(roomId).emit('receiveMessage', { senderId, content: message });
+
+  console.log(`Message from ${senderId} in ${roomId}: ${message}`);
+});
+
+
+//old socket.io logic
+/*
+io.on('connection', (socket) => {
+  console.log(`User connected: ${socket.id}`);
+
+  socket.on('joinRoom', (roomId) => {
+      socket.join(roomId);
+      console.log(`User joined room: ${roomId}`);
+  });
+
+  socket.on('sendMessage', async ({ roomId, senderId, message }) => {
+      const timestamp = new Date();
+
+      try {
+          await pool.query(
+              `INSERT INTO messages (conversation_id, sender_id, content, created_at)
+               VALUES ($1, $2, $3, $4)`,
+              [roomId, senderId, message, timestamp]
+          );
+
+          io.to(roomId).emit('receiveMessage', {
+              senderId,
+              content: message,
+              createdAt: timestamp,
+          });
+      } catch (err) {
+          console.error('Error saving message:', err);
+      }
+  });
+
+  socket.on('disconnect', () => {
+      console.log(`User disconnected: ${socket.id}`);
+  });
+});
+*/
+
 // *****************************************************
 // <!-- Section 5 : Start Server -->
 // *****************************************************
@@ -495,4 +590,5 @@ function auth(req, res, next) {
 // });
 
 //app.listen(3000);
-module.exports = app.listen(3000);
+//module.exports = app.listen(3000);
+module.exports = server.listen(3000);  // For socket.io

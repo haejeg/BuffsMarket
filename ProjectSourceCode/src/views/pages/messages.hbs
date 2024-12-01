@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat</title>
+    <style>
+        .transition {
+            transition: all 0.4s !important;
+            position: relative !important; 
+        }
+        small:hover {
+            color: rgb(82, 80, 70) !important;
+        }
+        .custom-btn {
+            background-color: #CFB87C;
+            color: #fff;
+        }
+        .custom-btn:hover {
+            background-color: #fff9d7;
+            color: #363636;
+        }
+        .custom-title {
+            color: transparent;
+            background: linear-gradient(50deg, #ffffff, 50%, #CFB87C);
+            -webkit-background-clip: text;
+        }
+        #message-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        #message-input {
+            width: calc(100% - 80px);
+            padding: 10px;
+        }
+        #send-button {
+            width: 70px;
+            padding: 10px;
+            background-color: #CFB87C;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #send-button:hover {
+            background-color: #fff9d7;
+            color: #363636;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <div class="container">
+        <h1 class="custom-title">Live Chat</h1>
+        
+        <!-- Message display container -->
+        <div id="message-container"></div>
+        
+        <!-- Chat input form -->
+        <form id="send-container">
+            <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required>
+            <button type="submit" id="send-button">Send</button>
+        </form>
+    </div>
+
+    <!-- Include Socket.IO client library -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Client-side Socket.IO logic -->
+    <script>
+        const socket = io(); // Connect to the Socket.IO server
+        const messageContainer = document.getElementById('message-container');
+        const messageInput = document.getElementById('message-input');
+        const sendContainer = document.getElementById('send-container');
+
+        // Emit an event to join a chat room
+        //const roomId = 'room123'; // Replace with dynamic room ID for private chats
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('roomId') || 'defaultRoom';
+        const senderId = 'user1'; // Replace with the logged-in user's ID
+        socket.emit('joinRoom', roomId);    
+
+        // Confirm room joining in the console
+        console.log(`Joined room: ${roomId}`);
+
+
+        // Listen for incoming messages and display them
+        socket.on('receiveMessage', (message) => {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `${message.senderId}: ${message.content}`;
+            messageContainer.appendChild(messageElement);
+            messageContainer.scrollTop = messageContainer.scrollHeight; // Auto-scroll to the latest message
+        });
+
+        // Handle sending messages
+        sendContainer.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent the form from submitting normally
+            const message = messageInput.value.trim();
+            if (message) {
+                // Emit the message to the server
+                socket.emit('sendMessage', { roomId, senderId, message });
+
+                // Display the message locally
+                const messageElement = document.createElement('div');
+                messageElement.textContent = `You: ${message}`;
+                messageContainer.appendChild(messageElement);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                // Clear the input field
+                messageInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
