@@ -108,7 +108,7 @@ app.get('/chat', (req, res) => {
     return res.redirect('/login');
   }
 
-  res.render('pages/chat');
+  res.render('pages/chat', {user: req.session.user,} );
 });
 
 app.get('/home', auth, async (req, res) => {
@@ -160,6 +160,19 @@ app.get('/messages', async (req, res) => {
 });
 
 // POST /chat - Send a message
+/*
+const receivedMessages = await db.any(
+      `SELECT 
+        messages.content, 
+        TO_CHAR(messages.timestamp, 'FMMonth DD, YYYY HH12:MI AM') AS timestamp, 
+        users.nickname AS senderNickname
+       FROM messages
+       JOIN users ON messages.senderID = users.id
+       WHERE messages.receiverID = $1
+       ORDER BY messages.timestamp DESC`,
+      [userId]
+    );    
+*/
 app.post('/chat', async (req, res) => {
   const { receiverID, content } = req.body;
   const senderID =  req.session.user.id; // Assuming the sender's ID is in the session
