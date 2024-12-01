@@ -27,9 +27,11 @@ const hbs = handlebars.create({
   partialsDir: path.join(__dirname, 'views/partials'),
 });
 
+require('dotenv').config(); // Load environment variables
+
 const dbConfig = {
-  host: 'db',
-  port: 5432,
+  host: process.env.POSTGRES_HOST, // Use the host from the .env file
+  port: process.env.POSTGRES_PORT || 5432,
   database: process.env.POSTGRES_DB,
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
@@ -45,7 +47,6 @@ db.connect()
   .catch((error) => {
     console.log('ERROR:', error.message || error);
   });
-
 
 
 // *****************************************************
