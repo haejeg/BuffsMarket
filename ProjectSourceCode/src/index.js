@@ -30,8 +30,8 @@ const hbs = handlebars.create({
 
 
 const dbConfig = {
-  host: process.env.POSTGRES_HOST, // Use the host from the .env file
-  port: process.env.POSTGRES_PORT || 5432,
+  host: 'db', // Use the host from the .env file
+  port: 5432,
   database: process.env.POSTGRES_DB,
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
