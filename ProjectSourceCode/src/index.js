@@ -314,7 +314,6 @@ async function makeBucketPublic() {
 
   console.log(`Bucket ${bucketName} is now publicly readable`);
 }
-makeBucketPublic().catch(console.error);
 
 app.post('/home', upload.single('image'), async (req, res) => {
   try {
