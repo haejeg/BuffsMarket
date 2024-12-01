@@ -177,7 +177,7 @@ app.post('/chat', async (req, res) => {
 
     // Insert the message into the database
     await db.none(
-      'INSERT INTO messages (senderID, senderNickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
+      'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
       [senderID, senderNickname, receiverID, content, timestamp]
     );
 

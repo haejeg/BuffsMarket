@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS purchases (
 CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   senderID INT NOT NULL,
-  senderNickname VARCHAR(60) NOT NULL,
+  sendernickname VARCHAR(60) NOT NULL,
   receiverID INT NOT NULL,
   content TEXT NOT NULL,
   timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
