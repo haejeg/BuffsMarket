@@ -354,7 +354,16 @@ app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten
 });
 
 
-
+// Logout route
+app.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Failed to destroy session:', err);
+      return res.status(500).send('Error logging out');
+    }
+    res.render('pages/login', { message: 'Logged out Successfully' });
+  });
+});
 
 /*
 app.post('/register', async (req, res) => {
