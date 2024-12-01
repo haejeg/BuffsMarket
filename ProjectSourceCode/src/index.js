@@ -177,7 +177,7 @@ app.post('/chat', async (req, res) => {
 
     // Insert the message into the database
     await db.none(
-      'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
+      'INSERT INTO messages (senderID, senderNickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
       [senderID, senderNickname, receiverID, content, timestamp]
     );
 
@@ -432,7 +432,7 @@ app.post('/login', async (req, res) => {
           console.error('Error saving session:', err);
           return res.render('pages/login', { message: 'An unexpected error occurred. Please try again later.', error:true });
         }
-        res.redirect('/account');
+        res.redirect('/home');
       }); 
     } else {
       // Incorrect password, render login with an error message
