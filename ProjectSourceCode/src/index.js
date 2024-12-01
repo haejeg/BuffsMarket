@@ -121,6 +121,39 @@ app.get('/home', async (req, res) => { // Add 'auth' later to ensure that only l
   }
 });
 
+// Display message page (send and receive)
+app.get('/message', async (req, res) => {
+  const userId = req.session.user.id;
+
+  try {
+    // Fetch received messages for the logged-in user
+    const receivedMessages = await db.any(
+      `SELECT messages.content, messages.timestamp, users.nickname AS senderNickname
+       FROM messages
+       JOIN users ON messages.sender_id = users.id
+       WHERE messages.receiver_id = $1
+       ORDER BY messages.timestamp DESC`,
+      [userId]
+    );
+
+    res.render('pages/message', { 
+      receivedMessages, 
+      message: req.session.message || null // Display any message (e.g., success/error)
+    });
+
+    // Clear the message after rendering
+    req.session.message = null;
+
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.render('pages/message', { 
+      message: 'Error fetching messages. Please try again later.', 
+      error: true 
+    });
+  }
+});
+
+
 // Send a message route (MIGHT NOT WORK)
 app.post('/message', async (req, res) => {
   const { receiverEmail, content } = req.body;
@@ -149,8 +182,6 @@ app.post('/message', async (req, res) => {
     res.status(500).render('pages/message', { message: 'Error sending message. Please try again later.', error: true });
   }
 });
-
-
 
 // Update Nickname
 app.post('/account/update-nickname', auth, async (req, res) => {

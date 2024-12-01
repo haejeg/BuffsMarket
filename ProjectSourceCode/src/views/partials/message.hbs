@@ -1,90 +1,61 @@
+<!-- message.hbs -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Send Message</title>
-  <link rel="stylesheet" href="/styles.css"> <!-- Optional: Link to external CSS file for styling -->
+  <title>Messages</title>
+  <link rel="stylesheet" href="/styles.css"> <!-- Link to your CSS -->
 </head>
-
 <body>
-  <div class="container">
-    <h1>Send a Message</h1>
+  <header>
+    <h1>Messages</h1>
+    <nav>
+      <a href="/home">Home</a>
+      <a href="/profile">Profile</a>
+    </nav>
+  </header>
 
-    <!-- Message form -->
-    <form method="POST" action="/send-message">
-      <div class="form-group">
-        <label for="receiverEmail">Receiver's Email:</label>
-        <input type="email" id="receiverEmail" name="receiverEmail" placeholder="Enter receiver's email" required>
-      </div>
+  <!-- Message Sending Form -->
+  <section>
+    <h2>Send a Message</h2>
+    <form action="/message" method="POST">
+      <label for="receiverEmail">Receiver Email:</label>
+      <input type="email" id="receiverEmail" name="receiverEmail" required>
 
-      <div class="form-group">
-        <label for="content">Message:</label>
-        <textarea id="content" name="content" placeholder="Enter your message" required></textarea>
-      </div>
+      <label for="content">Message:</label>
+      <textarea id="content" name="content" required></textarea>
 
-      <button type="submit">Send Message</button>
+      <button type="submit">Send</button>
     </form>
 
-    <!-- Error or success message display (optional) -->
-    <div id="message-status"></div>
+    {{#if message}}
+      <div class="message {{#if error}}error{{/if}}">
+        {{message}}
+      </div>
+    {{/if}}
+  </section>
 
-    <!-- Section to display messages sent by the user -->
-    <h2>Your Sent Messages</h2>
-    <div id="sent-messages">
-      <!-- Messages will be dynamically loaded here -->
-      <p>No messages sent yet.</p>
-    </div>
-  </div>
+  <!-- Received Messages -->
+  <section>
+    <h2>Your Messages</h2>
 
-  <script>
-    // Check for a status message in the URL query parameters (for example after a successful or failed submission)
-    const messageStatus = new URLSearchParams(window.location.search).get('status');
+    {{#if receivedMessages && receivedMessages.length}}
+      <ul>
+        {{#each receivedMessages}}
+          <li>
+            <strong>{{this.senderNickname}}</strong> ({{this.timestamp}}):
+            <p>{{this.content}}</p>
+          </li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p>You have no messages yet.</p>
+    {{/if}}
+  </section>
 
-    if (messageStatus) {
-      const statusDiv = document.getElementById('message-status');
-      if (messageStatus === 'success') {
-        statusDiv.textContent = 'Message sent successfully!';
-        statusDiv.style.color = 'green';
-      } else if (messageStatus === 'error') {
-        statusDiv.textContent = 'There was an error sending your message.';
-        statusDiv.style.color = 'red';
-      }
-    }
-
-    // Function to fetch and display sent messages
-    async function loadSentMessages() {
-      try {
-        const response = await fetch('/sent-messages'); // Assuming you have a route to fetch the sent messages
-        const data = await response.json();
-
-        const sentMessagesContainer = document.getElementById('sent-messages');
-        if (data.messages && data.messages.length > 0) {
-          sentMessagesContainer.innerHTML = ''; // Clear "No messages sent yet" message
-
-          data.messages.forEach(message => {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.innerHTML = `
-              <strong>To:</strong> ${message.receiverEmail}<br>
-              <strong>Message:</strong> ${message.content}<br>
-              <strong>Sent on:</strong> ${new Date(message.timestamp).toLocaleString()}<br>
-              <hr>
-            `;
-            sentMessagesContainer.appendChild(messageDiv);
-          });
-        } else {
-          sentMessagesContainer.innerHTML = '<p>No messages sent yet.</p>';
-        }
-      } catch (error) {
-        console.error('Error loading sent messages:', error);
-      }
-    }
-
-    // Load the sent messages when the page is ready
-    loadSentMessages();
-  </script>
+  <footer>
+    <p>&copy; 2024 Your Application</p>
+  </footer>
 </body>
-
 </html>
