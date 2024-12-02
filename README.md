@@ -55,7 +55,11 @@ Ethan Telang | etelangboulder | ette8193@colorado.edu
 - Using the same instructions and prerequisites to run the software locally we can find that in web-1 logs/console it will run through the different tests and see if they are passing or not.
 - To add more tests, you can go to server.spec.js in the test folder and add the specific test.
 
-
+## Release Notes Dec 2, 2024
+- Ability to list item with multiple images
+- Chat ability (almost done)
+- Logout and username change
+- My listings page contains current live listings for specific user
 ## Release Notes Nov 17, 2024
 - Ability to add listing within the website with an associated image.
 - Major CSS changes to listings pages and home pages.
