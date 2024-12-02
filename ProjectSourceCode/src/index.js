@@ -541,17 +541,19 @@ app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten
   }
 });
 
-app.post('/edit-listing', async (req, res) => { //up to ten images otherwise error
+app.post('/edit-listing', upload.array('image[]', 10), async (req, res) => { //up to ten images otherwise error
   try {
     console.log('Request body:', req.body);
+    console.log('Uploaded files:', req.files);
 
     const user = req.session.user
+    const time = new Date().toISOString();
     const listing = await db.oneOrNone('SELECT user_id FROM listings WHERE id = $1', [user.id]); // make sure user who isn't owner of lsiting can't edit lisitng
     if (!listing || listing.user_id !== user.id) {
     return res.status(403).send("Unauthorized to edit this listing.");
 }
 
-    const { item_name, description, pricing, listing_id } = req.body;
+    const { item_name, description, pricing, listing_id, remove_images } = req.body;
 
     if (!item_name || !description || !pricing || !listing_id) { //verify all parmaaters present
       console.log(item_name);
@@ -566,6 +568,51 @@ app.post('/edit-listing', async (req, res) => { //up to ten images otherwise err
       'UPDATE listings SET title = $1, description = $2, price = $3, updated_at = NOW() WHERE id = $4',
       [item_name, description, pricing, listing_id]
     );
+
+    // Handle Image Deletion
+    if (remove_images) {
+      const imagesToRemove = Array.isArray(remove_images) ? remove_images : [remove_images];
+      for (const image_id of imagesToRemove) {
+        // Remove from database
+        await db.none('DELETE FROM listing_images WHERE id = $1', [image_id]);
+
+        // Optionally, remove from Google Cloud Storage
+        const image = await db.oneOrNone('SELECT image_url FROM listing_images WHERE id = $1', [image_id]);
+        if (image) {
+          const filePath = image.image_url.split('/').pop(); // Extract file name
+          await storage.bucket(bucketName).file(filePath).delete();
+        }
+      }
+    }
+
+    const imageQueries = []; //array of all the image queries that will be inserted into the database
+    let isMain = true; // first image is the main one
+
+    for (const file of req.files) {
+      const uniqueFileName = `${Date.now()}-${file.originalname}`; //date + filename so its unique
+      const destination = uniqueFileName;
+
+      // put the file into the google cloud storage
+      await storage.bucket(bucketName).upload(file.path, {
+        destination: destination,
+      });
+
+      // image url to be inserted into the database
+      const imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+
+      // Add query to insert image into the database
+      imageQueries.push(
+        db.none(
+          'INSERT INTO listing_images (listing_id, image_url, is_main) VALUES ($1, $2, $3)',
+          [listingId, imageUrl, isMain]
+        )
+      );
+
+      isMain = false; // Only the first image is the main image
+    }
+
+    // Run all image insert queries
+    await Promise.all(imageQueries);
 
     console.log(user.id)
     console.log(`Listing edited with ID: ${listing_id}`);

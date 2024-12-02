@@ -225,7 +225,7 @@
           <div class="modal-body">
             <!-- Form structure inside modal -->
             <div class="create_container">
-              <form method="POST" action="/edit-listing" class="w-100">
+              <form method="POST" action="/edit-listing" class="w-100" enctype="multipart/form-data">
                 <div class="mb-3">
                   <label for="item_name" class="form-label">Update Name</label>
                   <input type="text" class="form-control" id="item_name" name="item_name">
@@ -235,18 +235,72 @@
                   <label for="description" class="form-label">Update Item Description</label>
                   <input type="text" class="form-control" id="description" name="description">
                 </div>
-              <!---
-                <div id="imageUploadContainer">
-                  <div class="mb-3 image-upload-group">
-                    <label for="imageUpload" class="form-label">Upload Image</label>
-                    <input type="file" id="imageUpload" name="image[]" accept="image/*"/>
-                    <div id="uploadStatus"></div> 
+
+
+                <!-- Existing Images -->
+                <div id="existingImagesContainer" class="mb-3">
+                  <label class="form-label">Existing Images</label>
+                  <div class="existing-images">
+                    {{#each listing_images}}
+                      <div class="image-item">
+                        <img src="{{this.image_url}}" alt="Listing Image" class="img-thumbnail" width="100">
+                        <button type="button" class="btn btn-danger btn-sm remove-image" data-image-id="{{@index}}">Remove</button>
+                      </div>
+                    {{/each}}
                   </div>
-              -->  
                 </div>
-                <button type="button" id="addImageUpload"  class="btn custom-btn transition">+ Add More Images</button>
-                <script> //recreate the image upload button so that multiple images can be uploaded
-                </script>
+
+            <div id="imageUploadContainer">
+              <div class="mb-3 image-upload-group">
+                <label for="imageUpload" class="form-label">Upload Image</label>
+                <input type="file" id="imageUpload" name="image[]" accept="image/*" required />
+                <div id="uploadStatus"></div> <!-- To show upload status -->
+              </div>
+            </div>
+            <button type="button" id="addImageUpload"  class="btn custom-btn transition">+ Add More Images</button>
+            <script> //recreate the image upload button so that multiple images can be uploaded
+              document.getElementById('addImageUpload').addEventListener('click', function () {
+                // Create a new div for the image upload field
+                const newImageUploadGroup = document.createElement('div');
+                newImageUploadGroup.classList.add('mb-3', 'image-upload-group');
+
+                // New label 
+                const newLabel = document.createElement('label');
+                newLabel.classList.add('form-label');
+                newLabel.textContent = 'Upload Image';
+
+                // Create the input field
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.name = 'image[]'; // Use array notation to allow multiple files
+                newInput.accept = 'image/*';
+                newInput.required = true;
+
+                // Create the upload status div
+                const uploadStatusDiv = document.createElement('div');
+
+                // Remove button code
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.textContent = 'Remove';
+                removeButton.classList.add('btn', 'btn-danger', 'btn-sm', 'mt-2');
+                
+                // create an event listener for the remove button
+                removeButton.addEventListener('click', function () {
+                  newImageUploadGroup.remove(); // Remove the entire group
+                });
+
+                // Append elements to the new div
+                newImageUploadGroup.appendChild(newLabel);
+                newImageUploadGroup.appendChild(newInput);
+                newImageUploadGroup.appendChild(uploadStatusDiv);
+                newImageUploadGroup.appendChild(removeButton);
+
+
+                // add the new div to the container so that the button will appear
+                document.getElementById('imageUploadContainer').appendChild(newImageUploadGroup);
+              });
+            </script>
 
                 <div class="mb-3">
                   <label for="pricing" class="form-label">Update Item Price</label>
