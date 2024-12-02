@@ -1,9 +1,13 @@
+
+/*
 INSERT INTO users (email, password, nickname)
 VALUES
     ('waddlebeestovetop@colorado.edu', 'waddlebee', 'waddlebee'),
     ('test_insert1@colorad.edu', 'test_insert1', 'test_insert1'),
     ('test_insert2@colorado.edu', 'test_insert2', 'test_insert2');
+*/
 
+/*
 INSERT INTO listings (user_id, title, description, price, quantity, category_id, status)
 VALUES
     (1, 'Vintage Camera', 'A high-quality vintage camera from the 1960s.', 120.00, 5, 1,'available'),
@@ -24,6 +28,6 @@ VALUES
     (5, '/img/Guitar.jpg', TRUE), 
     (6, '/img/Physics_textbook.jpg', TRUE),
     (7, '/img/Xbox_controller.jpg', TRUE);
-
+*/
 
     -- /img/Old_camera.jpg  --

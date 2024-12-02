@@ -4,7 +4,7 @@ services:
     image: postgres:14
     env_file: .env
     environment:
-      POSTGRES_DB: users_db  # Ensure this is set to your intended database
+      POSTGRES_DB: users_db  # Ensure this is set to your intended database. Was 'users_db'.
     ports:
       - '5432:5432'
     volumes:
