@@ -196,6 +196,70 @@
     Start Chat with {{listing.user_id}}
   </button>
 </div>
+  <!--
+    {{!-- Edit Listing Button (only for the owner of the listing) --}}
+    {{#if (eq user.id listing.user_id)}}
+    <a href="/editlisting?id={{listing.listing_id}}" class="btn btn-warning mt-3">
+        Edit Listing
+    </a>
+    {{/if}}
+  -->
+
+    {{!-- Edit Listing Button (only for the owner of the listing) --}}
+    {{#if (eq user.id listing.user_id)}}
+
+     <button type="button" class="btn btn-dark"  data-bs-toggle="modal" data-bs-target="#editListingModal">
+          Edit Listing
+      </button>
+    {{/if}}
+
+
+  <!-- Modal Structure -->
+      <div class="modal fade" id="editListingModal" tabindex="-1" aria-labelledby="editListingModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editListingModalLabel">Edit Listing</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Form structure inside modal -->
+            <div class="create_container">
+              <form method="POST" action="/edit-listing" class="w-100">
+                <div class="mb-3">
+                  <label for="item_name" class="form-label">Update Name</label>
+                  <input type="text" class="form-control" id="item_name" name="item_name">
+                </div>
+                <div class="mb-3">
+                  {{> message}}
+                  <label for="description" class="form-label">Update Item Description</label>
+                  <input type="text" class="form-control" id="description" name="description">
+                </div>
+              <!---
+                <div id="imageUploadContainer">
+                  <div class="mb-3 image-upload-group">
+                    <label for="imageUpload" class="form-label">Upload Image</label>
+                    <input type="file" id="imageUpload" name="image[]" accept="image/*"/>
+                    <div id="uploadStatus"></div> 
+                  </div>
+              -->  
+                </div>
+                <button type="button" id="addImageUpload"  class="btn custom-btn transition">+ Add More Images</button>
+                <script> //recreate the image upload button so that multiple images can be uploaded
+                </script>
+
+                <div class="mb-3">
+                  <label for="pricing" class="form-label">Update Item Price</label>
+                  <input type="number" min="0.00" step="0.01" class="form-control" id="pricing" name="pricing">
+                </div>
+                <input type="hidden" name="listing_id" value="{{listing.listing_id}}"> <!-- hidden input for identifying listing being edited -->
+                <button type="submit" class="btn custom-btn transition">Update Listing</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
     </div>

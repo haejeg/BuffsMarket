@@ -24,6 +24,9 @@ const hbs = handlebars.create({
   extname: 'hbs',
   layoutsDir: path.join(__dirname, 'views/layouts'),
   partialsDir: path.join(__dirname, 'views/partials'),
+  helpers: {
+    eq: (a, b) => a === b,
+  },
 });
 
 /*
@@ -184,6 +187,7 @@ app.get('/home', auth, async (req, res) => {
     const query = 
     `SELECT 
       listings.id AS listing_id, 
+      listings.user_id AS user_id,
       listings.title, 
       listings.price, 
       TO_CHAR(listings.created_at, 'FMMonth DD, YYYY') AS created_date, 
@@ -534,6 +538,41 @@ app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten
   } catch (err) {
     console.error("Error creating listing:", err);
     res.status(500).send("Error creating listing or uploading image");
+  }
+});
+
+app.post('/edit-listing', async (req, res) => { //up to ten images otherwise error
+  try {
+    console.log('Request body:', req.body);
+
+    const user = req.session.user
+    const listing = await db.oneOrNone('SELECT user_id FROM listings WHERE id = $1', [user.id]); // make sure user who isn't owner of lsiting can't edit lisitng
+    if (!listing || listing.user_id !== user.id) {
+    return res.status(403).send("Unauthorized to edit this listing.");
+}
+
+    const { item_name, description, pricing, listing_id } = req.body;
+
+    if (!item_name || !description || !pricing || !listing_id) { //verify all parmaaters present
+      console.log(item_name);
+      console.log(description);
+      console.log(pricing);
+      console.log(listing_id);
+      return res.status(400).send("Missing required fields");
+    }
+
+      // update listing in database
+    await db.none(
+      'UPDATE listings SET title = $1, description = $2, price = $3, updated_at = NOW() WHERE id = $4',
+      [item_name, description, pricing, listing_id]
+    );
+
+    console.log(user.id)
+    console.log(`Listing edited with ID: ${listing_id}`);
+    res.redirect(`/listing?id=${listing_id}`); // redirect to lisitng page with updated information
+  } catch (err) {
+    console.error("Error editing listing:", err);
+    res.status(500).send("Error editing listing");
   }
 });
 
