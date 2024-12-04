@@ -197,7 +197,20 @@ app.get('/home', auth, async (req, res) => {
     ON listings.id = listing_images.listing_id
     AND listing_images.is_main = TRUE`;
     const listings = await db.query(query);
-    res.render('pages/home', { listings , user: req.session.user });
+
+    /*
+    const message = req.session.message;
+    req.session.message = null; // Clear the message after retrieving
+  
+    res.render('home', { message, user: req.session.user });
+    */
+
+    const message = req.session.message;
+    req.session.message = null;
+
+    
+
+    res.render('pages/home', { listings , message, user: req.session.user });
   } catch (error) {
     console.error('Error fetching listings:', error);
     res.status(500).send('Server Error');
@@ -438,6 +451,8 @@ app.get('/listing', async (req, res) => {
       WHERE listing_id = $1
     `;
     const listing_images = await db.query(images_query, [listing_id]);
+
+    console.log('Listing data:', listing); //addition
 
     res.render('pages/listing', { listing, listing_images, user : req.session.user });
   } catch (error) {
@@ -731,7 +746,34 @@ app.get('/search', async (req, res) => {
   }
 });
 
+app.post('/delete-listing', async (req, res) => {
+  try {
+    const listing_id = req.body.id;
 
+    console.log("listing_id: ", listing_id);
+
+    if (!listing_id) {
+      return res.status(400).send('Listing ID not provided.');
+    }
+
+      const listing_del_query = `
+      DELETE FROM listings WHERE id = $1
+      `;
+      
+    const result = await db.query(listing_del_query, [listing_id]);
+    if(result[0] == 0){ // Check if listing is found.
+      return res.status(404).send('Listing not found.');
+    } 
+
+    // Do not need deletion query for images table because of ON DELETE CASCADE.
+    req.session.message = 'Listing deleted successfully.'; //NEW
+    res.redirect('/home');
+      
+  } catch (err) {
+    console.error('Error removing listing', error);
+    res.status(500).send('Server Error');
+  }
+});
 
 
 // *****************************************************

@@ -211,6 +211,11 @@
      <button type="button" class="btn btn-dark"  data-bs-toggle="modal" data-bs-target="#editListingModal">
           Edit Listing
       </button>
+
+    <form method="POST" action="/delete-listing">
+      <input type="hidden" name="id" value="{{listing.listing_id}}">
+      <button type="submit" class="btn btn-dark">Delete Listing</button>
+    </form>
     {{/if}}
 
 
