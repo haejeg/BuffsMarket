@@ -355,16 +355,18 @@
                 Start Chat with {{listing.nickname}}
             </button>
         </div>
+          {{#if (eq user.id listing.user_id)}}
+            <div class="d-flex justify-content-between">
+              <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#editListingModal">
+                Edit Listing
+              </button>
+              <form method="POST" action="/delete-listing">
+                <input type="hidden" name="id" value="{{listing.listing_id}}">
+                <button type="submit" class="btn btn-danger ms-auto">Delete Listing</button>
+              </form>
+            </div>
+          {{/if}}
 
-        {{#if (eq user.id listing.user_id)}}
-        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#editListingModal">
-            Edit Listing
-        </button>
-        <form method="POST" action="/delete-listing">
-        <input type="hidden" name="id" value="{{listing.listing_id}}">
-        <button type="submit" class="btn btn-dark">Delete Listing</button>
-      </form>
-        {{/if}}
         
 
         <!-- Modal Structure -->
