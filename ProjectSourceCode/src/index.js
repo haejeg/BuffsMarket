@@ -77,31 +77,31 @@ async function initializeDatabase() {
     console.error('Error initializing database with prepopulated users:', error);
   }
 
-  const listings_insertQuery = `INSERT INTO listings (user_id, title, description, price, quantity, category_id, status)
-VALUES
-    (1, 'Vintage Camera', 'A high-quality vintage camera from the 1960s.', 120.00, 5, 1,'available'),
-    (2, 'Antique Vase', 'A beautiful antique vase with intricate designs.', 250.00, 2, 2, 'available'),
-    (3, 'Gaming Laptop', 'A powerful gaming laptop with a 16GB RAM.', 899.99, 3, 3, 'sold'),
-    (1, 'Mountain Bike', 'A durable mountain bike for off-road trails.', 450.50, 7, 4, 'available'),
-    (2, 'Guitar', 'An acoustic guitar with a smooth sound.', 300.00, 10, 1, 'available'),
-    (3, 'Physics textbook good condition', 'Physics textbook good condition.', 50.49, 1, 2, 'available'),
-    (1, 'Xbox Controller', 'Used Xbox Controller, open ot offers', 35.69, 1, 3, 'available');`;
+//   const listings_insertQuery = `INSERT INTO listings (user_id, title, description, price, quantity, category_id, status)
+// VALUES
+//     (1, 'Vintage Camera', 'A high-quality vintage camera from the 1960s.', 120.00, 5, 1,'available'),
+//     (2, 'Antique Vase', 'A beautiful antique vase with intricate designs.', 250.00, 2, 2, 'available'),
+//     (3, 'Gaming Laptop', 'A powerful gaming laptop with a 16GB RAM.', 899.99, 3, 3, 'sold'),
+//     (1, 'Mountain Bike', 'A durable mountain bike for off-road trails.', 450.50, 7, 4, 'available'),
+//     (2, 'Guitar', 'An acoustic guitar with a smooth sound.', 300.00, 10, 1, 'available'),
+//     (3, 'Physics textbook good condition', 'Physics textbook good condition.', 50.49, 1, 2, 'available'),
+//     (1, 'Xbox Controller', 'Used Xbox Controller, open ot offers', 35.69, 1, 3, 'available');`;
 
-    await db.any(listings_insertQuery);
+//     await db.any(listings_insertQuery);
 
-    const listingImages_insertQuery = `INSERT INTO listing_images (listing_id, image_url, is_main)
-    VALUES
-        (1, '/img/Old_camera1.jpg', TRUE),
-        (1, '/img/Old_camera2.jpg', FALSE),
-        (2, '/img/Antique_vase.jpg', TRUE),
-        (3, '/img/Gaming_laptop.jpg', TRUE),
-        (4, '/img/Mountain_bike.jpg', TRUE),
-        (5, '/img/Guitar.jpg', TRUE), 
-        (6, '/img/Physics_textbook.jpg', TRUE),
-        (7, '/img/Xbox_controller.jpg', TRUE);
-    `;
+//     const listingImages_insertQuery = `INSERT INTO listing_images (listing_id, image_url, is_main)
+//     VALUES
+//         (1, '/img/Old_camera1.jpg', TRUE),
+//         (1, '/img/Old_camera2.jpg', FALSE),
+//         (2, '/img/Antique_vase.jpg', TRUE),
+//         (3, '/img/Gaming_laptop.jpg', TRUE),
+//         (4, '/img/Mountain_bike.jpg', TRUE),
+//         (5, '/img/Guitar.jpg', TRUE), 
+//         (6, '/img/Physics_textbook.jpg', TRUE),
+//         (7, '/img/Xbox_controller.jpg', TRUE);
+//     `;
     
-    await db.any(listingImages_insertQuery);
+//     await db.any(listingImages_insertQuery);
 }
 
 const dbConfig = {
@@ -306,11 +306,11 @@ app.post('/chat', async (req, res) => {
     const timestamp = new Date().toISOString();
     const senderNickname = req.session.user.nickname || 'Anonymous';
 
-    // Insert the message into the database
     await db.none(
-      'INSERT INTO messages (senderID, receiverID, content, timestamp) VALUES ($1, $2, $3, $4)',
-      [senderID, receiverID, content, timestamp]
+      'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
+      [senderID, senderNickname, receiverID, content, timestamp]
     );
+    
 
     res.render('pages/chat', { message: 'Message sent successfully.', error: false });
   } catch (error) {
@@ -404,7 +404,7 @@ const { Storage } = require('@google-cloud/storage');
 
 // Initialize a Storage client with the credentials
 const storage = new Storage({
-  keyFilename: '/etc/secrets/melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
+  keyFilename: 'melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
 app.get('/listing', async (req, res) => {
