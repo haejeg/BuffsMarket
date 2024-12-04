@@ -29,7 +29,6 @@ const hbs = handlebars.create({
   },
 });
 
-/*
 const db = pgp({
   connectionString: process.env.DATABASE_URL, // Render automatically injects this environment variable
   ssl: {
@@ -52,31 +51,31 @@ const pool = new Pool({
       console.log('Database connected successfully:', res.rows[0]);
     }
   })
-*/
 
-async function initializeDatabase() {
-  const users = [
-    { email: 'waddlebeestovetop@colorado.edu', password: 'waddlebee', nickname: 'waddlebee' },
-    { email: 'alexpaquier@icloud.com', password: 'test', nickname: 'waddlebee' },
-    { email: 'test_insert1@colorad.edu', password: 'test_insert1', nickname: 'test_insert1' },
-    { email: 'test_insert2@colorado.edu', password: 'test_insert2', nickname: 'test_insert2' },
-  ];
 
-  try {
-    for (const user of users) {
-      // Hash the password
-      user.password = await bcrypt.hash(user.password, 10);
-    }
+// async function initializeDatabase() {
+//   const users = [
+//     { email: 'waddlebeestovetop@colorado.edu', password: 'waddlebee', nickname: 'waddlebee' },
+//     { email: 'alexpaquier@icloud.com', password: 'test', nickname: 'waddlebee' },
+//     { email: 'test_insert1@colorad.edu', password: 'test_insert1', nickname: 'test_insert1' },
+//     { email: 'test_insert2@colorado.edu', password: 'test_insert2', nickname: 'test_insert2' },
+//   ];
 
-    // Insert users into the database
-    const insertQuery = 'INSERT INTO users (email, password, nickname) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING';
-    for (const user of users) {
-      await db.none(insertQuery, [user.email, user.password, user.nickname]);
-    }
-    console.log('Prepopulated users inserted successfully.');
-  } catch (error) {
-    console.error('Error initializing database with prepopulated users:', error);
-  }
+//   try {
+//     for (const user of users) {
+//       // Hash the password
+//       user.password = await bcrypt.hash(user.password, 10);
+//     }
+
+//     // Insert users into the database
+//     const insertQuery = 'INSERT INTO users (email, password, nickname) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING';
+//     for (const user of users) {
+//       await db.none(insertQuery, [user.email, user.password, user.nickname]);
+//     }
+//     console.log('Prepopulated users inserted successfully.');
+//   } catch (error) {
+//     console.error('Error initializing database with prepopulated users:', error);
+//   }
 
 //   const listings_insertQuery = `INSERT INTO listings (user_id, title, description, price, quantity, category_id, status)
 // VALUES
@@ -103,25 +102,25 @@ async function initializeDatabase() {
 //     `;
     
 //     await db.any(listingImages_insertQuery);
-}
+// }
 
-const dbConfig = {
-  host: 'db', // Use the host from the .env file
-  port: 5432,
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-};
-const db = pgp(dbConfig);
-db.connect()
-  .then((obj) => {
-    console.log('Database connection successful');
-    obj.done();
-    initializeDatabase(); // populates the users table with users with hashed passwords.
-  })
-  .catch((error) => {
-    console.log('ERROR:', error.message || error);
-  });
+// const dbConfig = {
+//   host: 'db', // Use the host from the .env file
+//   port: 5432,
+//   database: process.env.POSTGRES_DB,
+//   user: process.env.POSTGRES_USER,
+//   password: process.env.POSTGRES_PASSWORD,
+// };
+// const db = pgp(dbConfig);
+// db.connect()
+//   .then((obj) => {
+//     console.log('Database connection successful');
+//     obj.done();
+//     // initializeDatabase(); // populates the users table with users with hashed passwords.
+//   })
+//   .catch((error) => {
+//     console.log('ERROR:', error.message || error);
+//   });
 
 // *****************************************************
 // <!-- Section 3 : App Settings -->
@@ -435,7 +434,7 @@ const { Storage } = require('@google-cloud/storage');
 
 // Initialize a Storage client with the credentials
 const storage = new Storage({
-  keyFilename: 'melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
+  keyFilename: 'etc/secrets/melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
 app.get('/listing', async (req, res) => {
