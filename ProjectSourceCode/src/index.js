@@ -271,11 +271,21 @@ app.post('/start-chat', auth, async (req, res) => {
       [userId, receiverID]
     );
 
+    const timestamp = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Denver',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(new Date());
+
     if (!chatExists) {
       // Insert a placeholder message with sendernickname
       await db.none(
         'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
-        [userId, senderNickname, receiverID, '[Chat started]', new Date().toISOString()]
+        [userId, senderNickname, receiverID, '[Chat started]', timestamp]
       );
     }
 
@@ -303,7 +313,16 @@ app.post('/chat', async (req, res) => {
       return res.status(400).render('pages/chat', { message: 'Receiver ID is not valid.', error: true });
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Denver',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(new Date());
+    
     const senderNickname = req.session.user.nickname || 'Anonymous';
 
     await db.none(
@@ -491,7 +510,15 @@ app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten
       return res.status(400).send("Missing required fields");
     }
 
-    const time = new Date().toISOString();
+    const time = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Denver',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(new Date());
     const status = "available";
     const user = req.session.user
 
