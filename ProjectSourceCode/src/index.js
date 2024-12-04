@@ -57,6 +57,7 @@ const pool = new Pool({
 async function initializeDatabase() {
   const users = [
     { email: 'waddlebeestovetop@colorado.edu', password: 'waddlebee', nickname: 'waddlebee' },
+    { email: 'alexpaquier@icloud.com', password: 'test', nickname: 'waddlebee' },
     { email: 'test_insert1@colorad.edu', password: 'test_insert1', nickname: 'test_insert1' },
     { email: 'test_insert2@colorado.edu', password: 'test_insert2', nickname: 'test_insert2' },
   ];
@@ -77,31 +78,31 @@ async function initializeDatabase() {
     console.error('Error initializing database with prepopulated users:', error);
   }
 
-  const listings_insertQuery = `INSERT INTO listings (user_id, title, description, price, quantity, category_id, status)
-VALUES
-    (1, 'Vintage Camera', 'A high-quality vintage camera from the 1960s.', 120.00, 5, 1,'available'),
-    (2, 'Antique Vase', 'A beautiful antique vase with intricate designs.', 250.00, 2, 2, 'available'),
-    (3, 'Gaming Laptop', 'A powerful gaming laptop with a 16GB RAM.', 899.99, 3, 3, 'sold'),
-    (1, 'Mountain Bike', 'A durable mountain bike for off-road trails.', 450.50, 7, 4, 'available'),
-    (2, 'Guitar', 'An acoustic guitar with a smooth sound.', 300.00, 10, 1, 'available'),
-    (3, 'Physics textbook good condition', 'Physics textbook good condition.', 50.49, 1, 2, 'available'),
-    (1, 'Xbox Controller', 'Used Xbox Controller, open ot offers', 35.69, 1, 3, 'available');`;
+//   const listings_insertQuery = `INSERT INTO listings (user_id, title, description, price, quantity, category_id, status)
+// VALUES
+//     (1, 'Vintage Camera', 'A high-quality vintage camera from the 1960s.', 120.00, 5, 1,'available'),
+//     (2, 'Antique Vase', 'A beautiful antique vase with intricate designs.', 250.00, 2, 2, 'available'),
+//     (3, 'Gaming Laptop', 'A powerful gaming laptop with a 16GB RAM.', 899.99, 3, 3, 'sold'),
+//     (1, 'Mountain Bike', 'A durable mountain bike for off-road trails.', 450.50, 7, 4, 'available'),
+//     (2, 'Guitar', 'An acoustic guitar with a smooth sound.', 300.00, 10, 1, 'available'),
+//     (3, 'Physics textbook good condition', 'Physics textbook good condition.', 50.49, 1, 2, 'available'),
+//     (1, 'Xbox Controller', 'Used Xbox Controller, open ot offers', 35.69, 1, 3, 'available');`;
 
-    await db.any(listings_insertQuery);
+//     await db.any(listings_insertQuery);
 
-    const listingImages_insertQuery = `INSERT INTO listing_images (listing_id, image_url, is_main)
-    VALUES
-        (1, '/img/Old_camera1.jpg', TRUE),
-        (1, '/img/Old_camera2.jpg', FALSE),
-        (2, '/img/Antique_vase.jpg', TRUE),
-        (3, '/img/Gaming_laptop.jpg', TRUE),
-        (4, '/img/Mountain_bike.jpg', TRUE),
-        (5, '/img/Guitar.jpg', TRUE), 
-        (6, '/img/Physics_textbook.jpg', TRUE),
-        (7, '/img/Xbox_controller.jpg', TRUE);
-    `;
+//     const listingImages_insertQuery = `INSERT INTO listing_images (listing_id, image_url, is_main)
+//     VALUES
+//         (1, '/img/Old_camera1.jpg', TRUE),
+//         (1, '/img/Old_camera2.jpg', FALSE),
+//         (2, '/img/Antique_vase.jpg', TRUE),
+//         (3, '/img/Gaming_laptop.jpg', TRUE),
+//         (4, '/img/Mountain_bike.jpg', TRUE),
+//         (5, '/img/Guitar.jpg', TRUE), 
+//         (6, '/img/Physics_textbook.jpg', TRUE),
+//         (7, '/img/Xbox_controller.jpg', TRUE);
+//     `;
     
-    await db.any(listingImages_insertQuery);
+//     await db.any(listingImages_insertQuery);
 }
 
 const dbConfig = {
@@ -669,15 +670,6 @@ app.post('/edit-listing', upload.array('image[]', 10), async (req, res) => {
 });
 
 
-  
-
-
-
-
-
-
-
-
 // Logout route
 app.post('/logout', (req, res) => {
   req.session.destroy((err) => {
@@ -688,6 +680,100 @@ app.post('/logout', (req, res) => {
     res.render('pages/login', { message: 'Logged out Successfully' });
   });
 });
+
+const nodemailer = require("nodemailer");
+
+async function sendAuth(email) {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit OTP
+
+    const nodemailer = require('nodemailer');
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // Use the Gmail service
+      auth: {
+        user: 'buffsmarket@gmail.com', // Your Gmail address
+        pass: 'qmso rmuw fqdb luxz' // Your Gmail App Password
+      }
+    });
+
+
+    const mailOptions = {
+        from: '"Buffs Market" <buffsmarket@gmail.com>',
+        to: email,
+        subject: "Your authentication Code",
+        text: `Your authentication code is: ${otp}`,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`OTP sent to ${email}:`, otp);
+        return otp;
+    } catch (err) {
+        console.error("Error sending email:", err);
+        throw err;
+    }
+}
+
+app.get('/verify-otp', (req, res) => {
+  if (!req.session.otp || !req.session.email) {
+    // Redirect to login if OTP is not in session (e.g., session expired or bypass attempt)
+    return res.redirect('/login');
+  }
+  res.render('pages/verify-otp', { message: null, error: false }); // Render the OTP verification page
+});
+
+app.post('/verify-otp', async (req, res) => {
+  const { otp } = req.body;
+
+  if (otp === req.session.otp) {
+    try {
+      console.log('Verifying OTP for:', req.session.email);
+
+      // Update twoFA in the database
+      const updateQuery = 'UPDATE users SET twofa = $1 WHERE email = $2';
+      console.log('Running UPDATE query:', updateQuery, [true, req.session.email]);
+      await db.none(updateQuery, [true, req.session.email]);
+
+      // Verify the update
+      const checkQuery = 'SELECT twofa FROM users WHERE email = $1';
+      console.log('Running SELECT query:', checkQuery, [req.session.email]);
+      const updatedUser = await db.oneOrNone(checkQuery, [req.session.email]);
+      console.log('Query result:', updatedUser);
+
+      //if (updatedUser && updatedUser.twoFA) {
+        req.session.user.twofa = true;
+      
+        // Save session and redirect to home
+        req.session.save((err) => {
+          if (err) {
+            console.error('Error saving session:', err);
+            return res.render('pages/login', { 
+              message: 'An unexpected error occurred. Please try again later.', 
+              error: true 
+            });
+          }
+          console.log(`User "${req.session.email}" logged in successfully.`);
+          res.redirect('/home'); // Redirect to home after success
+        });
+    //}
+    } catch (err) {
+      console.error('Error updating database:', err);
+      res.status(500).render('pages/verify-otp', { 
+        message: 'An unexpected error occurred. Please try again later.', 
+        error: true 
+      });
+    }
+  } else {
+    // Incorrect OTP
+    console.log(`OTP verification failed for "${req.session.email}".`);
+    res.status(400).render('pages/verify-otp', { 
+      message: 'Incorrect OTP. Please try again.', 
+      error: true 
+    });
+  }
+});
+
+
 
 // Handle login
 app.post('/login', async (req, res) => {
@@ -704,11 +790,20 @@ app.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (match) {
       req.session.user = user;
+      console.log(user.twofa);
+      if (!req.session.user.twofa) {
+        const otp = await sendAuth(email);
+        req.session.otp = otp;
+        req.session.email = email;
+        res.redirect('/verify-otp');
+        return;
+      }
       req.session.save((err) => {
         if (err) {
           console.error('Error saving session:', err);
           return res.render('pages/login', { message: 'An unexpected error occurred. Please try again later.', error:true });
         }
+        //check = true;
         res.redirect('/home');
       }); 
     } else {

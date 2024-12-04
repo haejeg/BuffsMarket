@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(50) UNIQUE NOT NULL,
     password CHAR(60) NOT NULL,
-    nickname VARCHAR(60) NOT NULL
+    nickname VARCHAR(60) NOT NULL,
+    twofa BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS listings (
