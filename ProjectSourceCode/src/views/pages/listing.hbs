@@ -4,34 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-    .transition{
-      transition: all .4s !important;
-      -moz-transition: all .4s !important;
-      -webkit-transition:all .4s !important;
-      -o-transition: all .4s !important;
-      position:relative !important; 
+    .transition {
+        transition: all .4s !important;
+        -moz-transition: all .4s !important;
+        -webkit-transition: all .4s !important;
+        -o-transition: all .4s !important;
+        position: relative !important; 
     }
     small:hover {
-      color: rgb(82, 80, 70) !important;
+        color: rgb(82, 80, 70) !important;
     }
     .custom-btn {
-      background-color: #CFB87C;
-      color: #fff;
+        background-color: #CFB87C;
+        color: #fff;
     }
     .custom-btn:hover {
-      background-color: #fff9d7;
-      color: #363636;
+        background-color: #fff9d7;
+        color: #363636;
     }
     .custom-title {
-      color: transparent;
-      background: linear-gradient(50deg, #ffffff,  50%, #CFB87C);
-      -webkit-background-clip: text;
-      padding-bottom: 2px;
+        color: transparent;
+        background: linear-gradient(50deg, #ffffff, 50%, #CFB87C);
+        -webkit-background-clip: text;
+        padding-bottom: 2px;
     }
 
     .grid-container {
         display: grid;
-        grid-template-columns: repeat(5, 1fr); /* 5 columns */
+        grid-template-columns: repeat(5, 1fr);
         gap: 16px;
         padding: 20px;
     }
@@ -51,8 +51,8 @@
     }
     .listing-image {
         width: 100%;
-        height: 200px; /* Sets fixed height */
-        object-fit: cover; 
+        height: 200px;
+        object-fit: cover;
     }
     .listing-title {
         font-size: 2em;
@@ -90,28 +90,28 @@
         border-radius: 12px;
         max-width: 1250px;
         max-height: auto;
-        margin: 15px auto; /* Centers the container horizontally */
+        margin: 15px auto;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
 
     .slideshow-container {
         position: relative;
         max-width: 100%;
-        height: 450px; /* Set the desired height of the carousel */
+        height: 450px;
         overflow: hidden;
     }
 
     /* Slide */
     .listing-slide {
         position: relative;
-        display: none; /* Hide slides by default */
+        display: none;
         width: 100%;
         height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
         overflow: hidden;
-        background-size: cover; /* Cover the container with the background image */
+        background-size: cover;
         background-position: center;
     }
 
@@ -124,7 +124,7 @@
         background-size: cover;
         background-position: center;
         filter: blur(20px);
-        z-index: 1; /* Place it behind the main image */
+        z-index: 1;
     }
 
     /* Style the Previous/Next Buttons */
@@ -159,10 +159,175 @@
         width: 100%;
         height: 100%;
         object-fit: contain;
-        z-index: 2; /* Place above the blurred background */
+        z-index: 2;
     }
-  </style>
-     {{!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"> --}}
+    </style>
+</head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    .transition {
+        transition: all .4s !important;
+        -moz-transition: all .4s !important;
+        -webkit-transition: all .4s !important;
+        -o-transition: all .4s !important;
+        position: relative !important; 
+    }
+    small:hover {
+        color: rgb(82, 80, 70) !important;
+    }
+    .custom-btn {
+        background-color: #CFB87C;
+        color: #fff;
+    }
+    .custom-btn:hover {
+        background-color: #fff9d7;
+        color: #363636;
+    }
+    .custom-title {
+        color: transparent;
+        background: linear-gradient(50deg, #ffffff, 50%, #CFB87C);
+        -webkit-background-clip: text;
+        padding-bottom: 2px;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        padding: 20px;
+    }
+    .listing-item {
+        background-color: #ddd;
+        text-decoration: none;
+        border: 2px solid #CFB87C;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        padding: 10px;
+        transition: transform 0.1s ease;
+    }
+    .listing-item:hover {
+        transform: scale(1.02);
+    }
+    .listing-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .listing-title {
+        font-size: 2em;
+        font-weight: 500;
+        color: #000000;
+        text-decoration: none;
+        margin-top: 2px;
+        margin-bottom: 5px;
+    }
+    .listing-title:hover {
+        text-decoration: underline;
+    }
+    .listing-price {
+        font-size: 2em;
+        font-weight: 700;
+        color: #333;
+        margin-top: 6px;
+        margin-bottom: 3px;
+    }
+    .listing-date {
+        font-size: 0.9em;
+        color: #333;
+        margin-top: 1px;
+        margin-bottom: 4px;
+    }
+    .listing-description {
+        font-size: 1.25em;
+        color: #333;
+        margin-top: 1px;
+        margin-bottom: 4px;
+    }
+    .content-background {
+        background-color: #f5f5f5; 
+        padding: 18px;
+        border-radius: 12px;
+        max-width: 1250px;
+        max-height: auto;
+        margin: 15px auto;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .slideshow-container {
+        position: relative;
+        max-width: 100%;
+        height: 450px;
+        overflow: hidden;
+    }
+
+    /* Slide */
+    .listing-slide {
+        position: relative;
+        display: none;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .blurred-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        filter: blur(20px);
+        z-index: 1;
+    }
+
+    /* Style the Previous/Next Buttons */
+    .prev, .next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: auto;
+        padding: 16px;
+        margin-top: -22px;
+        color: #333;
+        font-weight: bold;
+        font-size: 18px;
+        transition: 0.3s;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+        z-index: 3;
+    }
+
+    .next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+
+    .prev:hover, .next:hover {
+        background-color: rgba(0,0,0,0.8);
+        color: #CFB87C;
+    }
+
+    .listing-slide .listing-image {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        z-index: 2;
+    }
+    </style>
+</head>
 <body data-bs-theme="dark">
     <div class="container content-background">
         
@@ -172,142 +337,167 @@
         <div class="slideshow-container">
             {{#each listing_images}}
             <div class="listing-slide">
-                <!-- Blurred Background Layer -->
                 <div class="blurred-background" style="background-image: url('{{this.image_url}}');"></div>
-                
-                <!-- Main Image Layer -->
                 <img src="{{this.image_url}}" class="listing-image" alt="Listing Image">
             </div>
             {{/each}}
-
-            <!-- Next and Previous Controls -->
             <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
             <a class="next" onclick="changeSlide(1)">&#10095;</a>
         </div>
 
         <div class="listing-details">
-  <h2 class="listing-title">{{listing.title}}</h2>
-  <p class="listing-price">${{listing.price}}</p>
-  <p class="listing-description">{{listing.description}}</p>
-  <p class="listing-date">Listed on: {{listing.created_date}}</p>
+            <h2 class="listing-title">{{listing.title}}</h2>
+            <p class="listing-price">${{listing.price}}</p>
+            <p class="listing-description">{{listing.description}}</p>
+            <p class="listing-date">Listed on: {{listing.created_date}}</p>
   
-  {{!-- Start Chat Button --}}
-  <button class="btn btn-primary mt-3" id="startChatButton" data-user-id="{{listing.user_id}}" data-user-nickname="{{listing.nickname}}">
-    Start Chat with {{listing.user_id}}
-  </button>
-</div>
-  <!--
-    {{!-- Edit Listing Button (only for the owner of the listing) --}}
-    {{#if (eq user.id listing.user_id)}}
-    <a href="/editlisting?id={{listing.listing_id}}" class="btn btn-warning mt-3">
-        Edit Listing
-    </a>
-    {{/if}}
-  -->
-
-    {{!-- Edit Listing Button (only for the owner of the listing) --}}
-    {{#if (eq user.id listing.user_id)}}
-
-     <button type="button" class="btn btn-dark"  data-bs-toggle="modal" data-bs-target="#editListingModal">
-          Edit Listing
-      </button>
-    {{/if}}
-
-
-  <!-- Modal Structure -->
-      <div class="modal fade" id="editListingModal" tabindex="-1" aria-labelledby="editListingModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editListingModalLabel">Edit Listing</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <!-- Form structure inside modal -->
-            <div class="create_container">
-              <form method="POST" action="/edit-listing" class="w-100">
-                <div class="mb-3">
-                  <label for="item_name" class="form-label">Update Name</label>
-                  <input type="text" class="form-control" id="item_name" name="item_name">
-                </div>
-                <div class="mb-3">
-                  {{> message}}
-                  <label for="description" class="form-label">Update Item Description</label>
-                  <input type="text" class="form-control" id="description" name="description">
-                </div>
-              <!---
-                <div id="imageUploadContainer">
-                  <div class="mb-3 image-upload-group">
-                    <label for="imageUpload" class="form-label">Upload Image</label>
-                    <input type="file" id="imageUpload" name="image[]" accept="image/*"/>
-                    <div id="uploadStatus"></div> 
-                  </div>
-              -->  
-                </div>
-                <button type="button" id="addImageUpload"  class="btn custom-btn transition">+ Add More Images</button>
-                <script> //recreate the image upload button so that multiple images can be uploaded
-                </script>
-
-                <div class="mb-3">
-                  <label for="pricing" class="form-label">Update Item Price</label>
-                  <input type="number" min="0.00" step="0.01" class="form-control" id="pricing" name="pricing">
-                </div>
-                <input type="hidden" name="listing_id" value="{{listing.listing_id}}"> <!-- hidden input for identifying listing being edited -->
-                <button type="submit" class="btn custom-btn transition">Update Listing</button>
-              </form>
-            </div>
-          </div>
+            <button class="btn btn-primary mt-3" id="startChatButton" data-user-id="{{listing.user_id}}" data-user-nickname="{{listing.nickname}}">
+                Start Chat with {{listing.nickname}}
+            </button>
         </div>
-      </div>
+
+        {{#if (eq user.id listing.user_id)}}
+        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#editListingModal">
+            Edit Listing
+        </button>
+        <form method="POST" action="/delete-listing">
+        <input type="hidden" name="id" value="{{listing.listing_id}}">
+        <button type="submit" class="btn btn-dark">Delete Listing</button>
+      </form>
+        {{/if}}
+        
+
+        <!-- Modal Structure -->
+        <div class="modal fade" id="editListingModal" tabindex="-1" aria-labelledby="editListingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editListingModalLabel">Edit Listing</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="/edit-listing" class="w-100" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="edit_item_name" class="form-label">Item Name</label>
+              <input type="text" class="form-control" id="edit_item_name" name="item_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit_description" class="form-label">Item Description</label>
+              <input type="text" class="form-control" id="edit_description" name="description" required>
+            </div>
+            <div id="editImageUploadContainer">
+  
+              <label for="newImages" class="form-label">Add New Images</label>
+              <div class="mb-3 image-upload-group">
+                <input type="file" id="editImageUpload" name="image[]" accept="image/*" />
+                <div id="uploadStatus"></div> <!-- To show upload status -->
+              </div>
+            </div>
+            <button type="button" id="addEditImageUpload" class="btn custom-btn transition">+ Add More Images</button>
+            <script>
+              // Add functionality to dynamically create image upload fields
+              document.getElementById('addEditImageUpload').addEventListener('click', function () {
+                // Create a new div for the image upload field
+                const newImageUploadGroup = document.createElement('div');
+                newImageUploadGroup.classList.add('mb-3', 'image-upload-group');
+
+                // New label
+                const newLabel = document.createElement('label');
+                newLabel.classList.add('form-label');
+
+                // Create the input field
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.name = 'image[]'; // Use array notation to allow multiple files
+                newInput.accept = 'image/*';
+
+                // Create the upload status div
+                const uploadStatusDiv = document.createElement('div');
+
+                // Create the remove button
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.textContent = 'Remove';
+                removeButton.classList.add('btn', 'btn-danger', 'btn-sm', 'mt-2');
+
+                // Add event listener to the remove button
+                removeButton.addEventListener('click', function () {
+                  newImageUploadGroup.remove(); // Remove the entire group
+                });
+
+                // Append elements to the new div
+                newImageUploadGroup.appendChild(newLabel);
+                newImageUploadGroup.appendChild(newInput);
+                newImageUploadGroup.appendChild(uploadStatusDiv);
+                newImageUploadGroup.appendChild(removeButton);
+    
+                // Append the new div to the container
+                document.getElementById('editImageUploadContainer').appendChild(newImageUploadGroup);
+              });
+
+              // Dynamically load existing images into the modal
+            </script>
+            <div class="mb-3">
+              <label for="pricing" class="form-label">Item Price</label>
+              <input type="number" min="0.00" step="0.01" class="form-control" id="pricing" name="pricing" required>
+            </div>
+            <input type="hidden" name="listing_id" value="{{listing.listing_id}}">
+            <button type="submit" class="btn btn-primary mt-3">Update Listing</button>
+          </form>
+            </div>
+        </div>
     </div>
+</div>
 
 
-    </div>
+    <script>
+        // "Start Chat" Button
+        document.getElementById('startChatButton').addEventListener('click', async function () {
+            const userId = this.dataset.userId;
+            const userNickname = this.dataset.userNickname;
+            try {
+                const response = await fetch('/start-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ receiverID: userId }),
+                });
+                if (response.ok) {
+                    window.location.href = `/chat?receiverID=${userId}&nickname=${userNickname}`;
+                } else {
+                    alert('Failed to start chat. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error starting chat:', error);
+            }
+        });
 
-        <script>
-             document.getElementById('startChatButton').addEventListener('click', async function () {
-    const userId = this.dataset.userId;
-    const userNickname = this.dataset.userNickname;
+        // Slideshow Functionality
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.listing-slide');
 
-    try {
-      const response = await fetch('/start-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ receiverID: userId }),
-      });
-
-      if (response.ok) {
-        // Redirect to the chat page after starting the chat
-        window.location.href = `/chat?receiverID=${userId}&nickname=${userNickname}`;
-      } else {
-        alert('Failed to start chat. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error starting chat:', error);
-      alert('An error occurred while starting the chat.');
-    }
-  });
-
-    let slideIndex = 1;
-    showSlide(slideIndex);
-
-    function changeSlide(n) {
-        showSlide(slideIndex += n);
-    }
-
-    function showSlide(n) {
-        let slides = document.getElementsByClassName("listing-slide");
-        if (n > slides.length) {slideIndex = 1}
-        if (n < 1) {slideIndex = slides.length}
-        for (let i = 0; i < slides.length; i++) {
-            slides[i].style.display = "none";
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.style.display = i === index ? 'flex' : 'none';
+            });
         }
-        slides[slideIndex - 1].style.display = "block";
-    }
-    </script>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-    {{!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> --}}
+        function changeSlide(n) {
+            slideIndex = (slideIndex + n + slides.length) % slides.length;
+            showSlide(slideIndex);
+        }
+
+        showSlide(slideIndex);
+
+        // Add More Image Upload Inputs
+        document.getElementById('addImageUpload').addEventListener('click', function () {
+            const container = document.getElementById('imageUploadContainer');
+            const newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.name = 'image[]';
+            newInput.accept = 'image/*';
+            newInput.className = 'form-control mt-2';
+            container.appendChild(newInput);
+        });
+    </script>
 </body>
 </html>

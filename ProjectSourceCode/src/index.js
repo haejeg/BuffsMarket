@@ -197,9 +197,39 @@ app.get('/home', auth, async (req, res) => {
     ON listings.id = listing_images.listing_id
     AND listing_images.is_main = TRUE`;
     const listings = await db.query(query);
-    res.render('pages/home', { listings , user: req.session.user });
+    const message = req.session.message;
+    req.session.message = null;
+    res.render('pages/home', { listings , message, user: req.session.user });
+    
   } catch (error) {
     console.error('Error fetching listings:', error);
+    res.status(500).send('Server Error');
+  }
+});
+
+
+app.post('/delete-listing', async (req, res) => {
+  try {
+    const listing_id = req.body.id;
+    console.log("listing_id: ", listing_id);
+    if (!listing_id) {
+      return res.status(400).send('Listing ID not provided.');
+    }
+
+      const listing_del_query = `
+      DELETE FROM listings WHERE id = $1
+      `;
+      
+    const result = await db.query(listing_del_query, [listing_id]);
+    if(result[0] == 0){ // Check if listing is found.
+      return res.status(404).send('Listing not found.');
+    } 
+    // Do not need deletion query for images table because of ON DELETE CASCADE.
+    req.session.message = 'Listing deleted successfully.'; //NEW
+    res.redirect('/home');
+      
+  } catch (err) {
+    console.error('Error removing listing', error);
     res.status(500).send('Server Error');
   }
 });
@@ -306,11 +336,11 @@ app.post('/chat', async (req, res) => {
     const timestamp = new Date().toISOString();
     const senderNickname = req.session.user.nickname || 'Anonymous';
 
-    // Insert the message into the database
     await db.none(
-      'INSERT INTO messages (senderID, receiverID, content, timestamp) VALUES ($1, $2, $3, $4)',
-      [senderID, receiverID, content, timestamp]
+      'INSERT INTO messages (senderID, sendernickname, receiverID, content, timestamp) VALUES ($1, $2, $3, $4, $5)',
+      [senderID, senderNickname, receiverID, content, timestamp]
     );
+
 
     res.render('pages/chat', { message: 'Message sent successfully.', error: false });
   } catch (error) {
@@ -404,7 +434,7 @@ const { Storage } = require('@google-cloud/storage');
 
 // Initialize a Storage client with the credentials
 const storage = new Storage({
-  keyFilename: '/etc/secrets/melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
+  keyFilename: 'melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
 app.get('/listing', async (req, res) => {
@@ -541,40 +571,111 @@ app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten
   }
 });
 
-app.post('/edit-listing', async (req, res) => { //up to ten images otherwise error
+app.post('/edit-listing', upload.array('image[]', 10), async (req, res) => {
   try {
-    console.log('Request body:', req.body);
+    console.log("Request body:", req.body);
+    console.log("Uploaded files:", req.files);
 
-    const user = req.session.user
-    const listing = await db.oneOrNone('SELECT user_id FROM listings WHERE id = $1', [user.id]); // make sure user who isn't owner of lsiting can't edit lisitng
-    if (!listing || listing.user_id !== user.id) {
-    return res.status(403).send("Unauthorized to edit this listing.");
-}
+    const { item_name, description, pricing, listing_id, delete_images } = req.body;
 
-    const { item_name, description, pricing, listing_id } = req.body;
+    console.log("listing id:", listing_id);
+    console.log("item_name:", item_name);
+    console.log("pricing", pricing);
+    console.log("description", description);
 
-    if (!item_name || !description || !pricing || !listing_id) { //verify all parmaaters present
-      console.log(item_name);
-      console.log(description);
-      console.log(pricing);
-      console.log(listing_id);
+    if (!item_name || !description || !pricing || !listing_id) {
       return res.status(400).send("Missing required fields");
     }
 
-      // update listing in database
+    const user = req.session.user;
+
+    // Verify that the user is the owner of the listing
+    const listing = await db.oneOrNone('SELECT user_id FROM listings WHERE id = $1', [listing_id]);
+    if (!listing || listing.user_id !== user.id) {
+      return res.status(403).send("Unauthorized to edit this listing.");
+    }
+
+    const time = new Date().toISOString();
+
+    // Update the listing details in the database
     await db.none(
-      'UPDATE listings SET title = $1, description = $2, price = $3, updated_at = NOW() WHERE id = $4',
-      [item_name, description, pricing, listing_id]
+      'UPDATE listings SET title = $1, description = $2, price = $3, updated_at = $4 WHERE id = $5',
+      [item_name, description, pricing, time, listing_id]
     );
 
-    console.log(user.id)
-    console.log(`Listing edited with ID: ${listing_id}`);
-    res.redirect(`/listing?id=${listing_id}`); // redirect to lisitng page with updated information
+    // Handle image replacement logic
+    if (req.files && req.files.length > 0) {
+      // Fetch existing images for the listing
+      const existingImages = await db.any(
+        'SELECT id, image_url FROM listing_images WHERE listing_id = $1',
+        [listing_id]
+      );
+
+      // Delete all existing images from Google Cloud Storage and the database
+      for (const image of existingImages) {
+        const fileNameToDelete = image.image_url.split('/').pop();
+        await storage.bucket(bucketName).file(fileNameToDelete).delete();
+        await db.none('DELETE FROM listing_images WHERE id = $1', [image.id]);
+      }
+
+      // Upload new images and insert them into the database
+      let isMain = true; // First uploaded image will be the main image
+      for (const file of req.files) {
+        const uniqueFileName = `${Date.now()}-${file.originalname}`;
+        const destination = uniqueFileName;
+
+        // Upload to Google Cloud Storage
+        await storage.bucket(bucketName).upload(file.path, {
+          destination: destination,
+        });
+
+        // Create image URL
+        const imageUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+
+        // Insert the new image into the database
+        await db.none(
+          'INSERT INTO listing_images (listing_id, image_url, is_main) VALUES ($1, $2, $3)',
+          [listing_id, imageUrl, isMain]
+        );
+
+        isMain = false; // Only the first image is marked as main
+      }
+    } else if (delete_images && Array.isArray(delete_images)) {
+      // If no new images are uploaded, handle deletions explicitly
+      for (const imageId of delete_images) {
+        // Get the image URL from the database
+        const image = await db.oneOrNone(
+          'SELECT image_url FROM listing_images WHERE id = $1 AND listing_id = $2',
+          [imageId, listing_id]
+        );
+
+        if (image) {
+          // Delete the image from Google Cloud Storage
+          const fileNameToDelete = image.image_url.split('/').pop();
+          await storage.bucket(bucketName).file(fileNameToDelete).delete();
+
+          // Delete the image record from the database
+          await db.none('DELETE FROM listing_images WHERE id = $1', [imageId]);
+        }
+      }
+    }
+
+    console.log(`Listing updated with ID: ${listing_id}`);
+    res.redirect(`/listing?id=${listing_id}`);
   } catch (err) {
-    console.error("Error editing listing:", err);
-    res.status(500).send("Error editing listing");
+    console.error("Error updating listing or uploading image:", err);
+    res.status(500).send("Error updating listing or uploading image");
   }
 });
+
+
+  
+
+
+
+
+
+
 
 
 // Logout route
