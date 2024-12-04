@@ -434,7 +434,7 @@ const { Storage } = require('@google-cloud/storage');
 
 // Initialize a Storage client with the credentials
 const storage = new Storage({
-  keyFilename: 'etc/secrets/melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
+  keyFilename: '/etc/secrets/melodic-scarab-442119-n3-2896bfca0008.json' // Replace with the path to your service account JSON file
 });
 
 app.get('/listing', async (req, res) => {
