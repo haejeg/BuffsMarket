@@ -539,7 +539,7 @@ app.post('/home', upload.array('image[]', 10), async (req, res) => { //up to ten
       return res.status(400).send("Missing required fields");
     }
 
-    const time = = new Intl.DateTimeFormat('en-US', {
+    const time = new Intl.DateTimeFormat('en-US', {
       timeZone: 'America/Denver',
       year: 'numeric',
       month: '2-digit',
