@@ -285,7 +285,7 @@ app.post('/start-chat', auth, async (req, res) => {
 
   try {
     console.log("Starting chat with:", receiverID);
-
+    //slight comment for commit
     // Validate the receiver's ID
     const receiver = await db.oneOrNone('SELECT id FROM users WHERE id = $1', [receiverID]);
     if (!receiver) {
