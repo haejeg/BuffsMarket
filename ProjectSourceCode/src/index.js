@@ -692,7 +692,7 @@ async function sendAuth(email) {
       service: 'gmail', // Use the Gmail service
       auth: {
         user: 'buffsmarket@gmail.com', // Your Gmail address
-        pass: 'qmso rmuw fqdb luxz' // Your Gmail App Password
+        pass: process.env.EMAILPASS // Your Gmail App Password
       }
     });
 
