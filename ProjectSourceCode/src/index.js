@@ -29,6 +29,7 @@ const hbs = handlebars.create({
   },
 });
 
+// *** RENDER ***
 const db = pgp({
   connectionString: process.env.DATABASE_URL, // Render automatically injects this environment variable
   ssl: {
@@ -51,6 +52,28 @@ const pool = new Pool({
       console.log('Database connected successfully:', res.rows[0]);
     }
   })
+// *** RENDER ***
+
+
+  // *** DOCKER ***
+  // const dbConfig = {
+  //   host: 'db', // Use the host from the .env file
+  //   port: 5432,
+  //   database: process.env.POSTGRES_DB,
+  //   user: process.env.POSTGRES_USER,
+  //   password: process.env.POSTGRES_PASSWORD,
+  // };
+  // const db = pgp(dbConfig);
+  // db.connect()
+  //   .then((obj) => {
+  //     console.log('Database connection successful');
+  //     obj.done();
+  //   })
+  //   .catch((error) => {
+  //     console.log('ERROR:', error.message || error);
+  //   });
+  // *** DOCKER ***
+
 
 
 // async function initializeDatabase() {

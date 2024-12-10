@@ -52,7 +52,7 @@ Ethan Telang | etelangboulder | ette8193@colorado.edu
 - Sql
 
 # How to run Tests:
-- Using the same instructions and prerequisites to run the software locally we can find that in web-1 logs/console it will run through the different tests and see if they are passing or not.
+- In Section 1: Import Dependencies in index.js, comment out the code labeled RENDER and uncomment the code labeled DOCKER. Then Uncomment the entirety of the server.spec.js file. Finally, run docker-compose up to run the tests in the terminal. 
 - To add more tests, you can go to server.spec.js in the test folder and add the specific test.
 
 ## Release Notes Dec 2, 2024
